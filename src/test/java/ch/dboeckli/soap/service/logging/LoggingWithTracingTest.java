@@ -1,4 +1,4 @@
-package ch.dboeckli.template.logging;
+package ch.dboeckli.soap.service.logging;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;

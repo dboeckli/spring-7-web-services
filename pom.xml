@@ -10,11 +10,9 @@
 
     </parent>
 
-    <!-- TODO: RENAME ME -->
-    <groupId>ch.dboeckli.template</groupId>
-    <!-- TODO: RENAME ME -->
-    <artifactId>spring-7-project-template</artifactId>
-    <version>0.0.13-SNAPSHOT</version>
+    <groupId>ch.dboeckli.spring.soap.service</groupId>
+    <artifactId>spring-7-web-services</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>

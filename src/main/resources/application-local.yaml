@@ -3,8 +3,7 @@ server:
 
 spring:
   application:
-    # // TODO: RENAME ME
-    name: spring-7-project-template
+    name: spring-7-web-services
   docker:
     compose:
       enabled: false

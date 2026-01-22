@@ -1,4 +1,4 @@
-package ch.dboeckli.template.log;
+package ch.dboeckli.soap.service.log;
 
 import org.slf4j.helpers.MessageFormatter;
 

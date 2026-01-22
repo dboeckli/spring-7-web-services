@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Spring6TemplateApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="local" />
-    <module name="spring-7-project-template" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="ch.dboeckli.template.Spring7TemplateApplication" />
+    <module name="spring-7-web-services" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="ch.dboeckli.soap.service.SpringSoapServiceApplication" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

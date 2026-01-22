@@ -1,5 +1,4 @@
-package ch.dboeckli.template;
-// TODOS: RENAME PACKAGE
+package ch.dboeckli.soap.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.ALWAYS)
 @Slf4j
 @ActiveProfiles("local")
-class Spring7TemplateApplicationIT {
+class SpringSoapServiceApplicationIT {
 
     @Autowired
     private ApplicationContext applicationContext;
