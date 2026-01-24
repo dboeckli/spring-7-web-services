@@ -55,7 +55,7 @@
         <merge-yaml-plugin.version>1.4</merge-yaml-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
 
-        <jaxb2-maven-plugin.version>4.0.0</jaxb2-maven-plugin.version>
+        <jaxb2-maven-plugin.version>4.1.0</jaxb2-maven-plugin.version>
 
         <!-- Testing -->
         <logcaptor.version>2.12.2</logcaptor.version>
