@@ -9,13 +9,13 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 @Endpoint
-public class CountryEndpoint {
+public class CountrySoapEndpoint {
 
     private static final String NAMESPACE_URI = "https://spring.io/guides/gs-producing-web-service";
 
     private final CountryRepository countryRepository;
 
-    public CountryEndpoint(CountryRepository countryRepository) {
+    public CountrySoapEndpoint(CountryRepository countryRepository) {
         this.countryRepository = countryRepository;
     }
 

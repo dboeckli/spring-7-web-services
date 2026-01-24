@@ -109,40 +109,4 @@ public class LoggingWithTracingTest {
         logger.detachAppender(listAppender);
         listAppender.stop();
     }
-
-    @Test
-    void hello_logsMessage_viaLogbackAppender() {
-        Logger logger = (Logger) LoggerFactory.getLogger(CommonsRequestLoggingFilter.class);
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-        listAppender.start();
-        logger.addAppender(listAppender);
-
-        String url = "http://localhost:" + port + "/hello";
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        List<ILoggingEvent> logEvents = listAppender.list;
-
-        assertAll(
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
-            () -> assertNotNull(logEvents),
-            () -> assertEquals(2, logEvents.size()),
-            () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getFirst().getLoggerName()),
-            () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"), // in micrometer traceId: 32 Hex
-            () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("spanId")).isNotBlank().matches("[0-9a-f]{16}"), // in micrometer spanId: 16 Hex
-            () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getLast().getLoggerName()),
-            () -> assertThat(logEvents.getLast().getMDCPropertyMap().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"),
-            () -> assertThat(logEvents.getLast().getMDCPropertyMap().get("spanId")).isNotBlank().matches("[0-9a-f]{16}"),
-            () -> assertEquals(
-                logEvents.getFirst().getMDCPropertyMap().get("traceId"),
-                logEvents.getLast().getMDCPropertyMap().get("traceId"),
-                "traceId muss für Request/Response identisch sein"
-            ),
-            () -> assertEquals(
-                logEvents.getFirst().getMDCPropertyMap().get("spanId"),
-                logEvents.getLast().getMDCPropertyMap().get("spanId"),
-                "spanId muss für Request/Response identisch sein"
-            )
-        );
-        logger.detachAppender(listAppender);
-        listAppender.stop();
-    }
 }

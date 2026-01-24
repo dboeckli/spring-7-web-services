@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(WebServiceTemplateConfiguration.class)
 @ActiveProfiles("local")
-public class ProducingWebServiceApplicationTest {
+public class CountrySoapEndpointTest {
 
     @LocalServerPort
     private int port;
