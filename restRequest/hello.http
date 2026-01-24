@@ -1,3 +1,0 @@
-### hello
-GET http://localhost:{{application-port}}/hello
-Accept: application/json

@@ -4,11 +4,9 @@ server:
 spring:
   application:
     name: spring-7-web-services
-  docker:
-    compose:
-      enabled: false
-      stop:
-        command: down
+
+  webservices:
+    wsdl-locations: classpath:META-INF/schemas/
 
 management:
   health:
