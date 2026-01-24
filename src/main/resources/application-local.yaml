@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: spring-7-web-services
+
+  webservices:
+    wsdl-locations: classpath:META-INF/schemas/
+
   docker:
     compose:
       enabled: false

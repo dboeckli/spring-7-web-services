@@ -55,6 +55,8 @@
         <merge-yaml-plugin.version>1.4</merge-yaml-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
 
+        <jaxb2-maven-plugin.version>4.0.0</jaxb2-maven-plugin.version>
+
         <!-- Testing -->
         <logcaptor.version>2.12.2</logcaptor.version>
 
@@ -143,6 +145,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webservices</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -187,6 +193,18 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webservices-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-restclient-test</artifactId>
@@ -479,6 +497,30 @@
                     <indentSize>2</indentSize>
                     <lineLength>180</lineLength>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>${jaxb2-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-schema</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>${project.basedir}/src/main/resources/META-INF/schemas/countriesWs.xsd</source>
+                    </sources>
+                    <packageName>ch.dboeckli.soap.service.producingwebservice.schema</packageName>
+                    <addGeneratedAnnotation>true</addGeneratedAnnotation>
+                    <enableIntrospection>true</enableIntrospection>
+                </configuration>
+
             </plugin>
 
             <!-- we need a port to be able to start the local profile -->
