@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Spring6TemplateApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="SpringSoapServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="local" />
     <module name="spring-7-web-services" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ch.dboeckli.soap.service.SpringSoapServiceApplication" />

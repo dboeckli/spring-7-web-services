@@ -1,5 +1,9 @@
 = Spring Boot 7 Template Project
 
+see: https://spring.io/guides/gs/producing-web-service
+and
+see: https://spring.io/guides/gs/consuming-web-service
+
 == Introduction
 This project serves as a template for Spring Boot 4 applications. It provides a solid foundation for quickly starting new Spring Boot projects with pre-configured settings and best practices.
 

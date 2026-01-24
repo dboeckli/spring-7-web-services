@@ -44,10 +44,41 @@ management:
     git:
       enabled: true
       mode: full
+  httpexchanges:
+    recording:
+      enabled: true
+      include: request_headers, response_headers, session_id, time_taken
+  observations:
+    annotations:
+      enabled: true
+    http:
+      server:
+        requests:
+          name: http.server.requests
+      client:
+        requests:
+          name: http-client-requests
+
+  otlp:
+    metrics:
+      export:
+        enabled: false
   tracing:
-    enabled: true
+    export:
+      otlp:
+        enabled: false
     sampling:
       probability: 1.0
+
+  logging:
+    export:
+      enabled: false
+      otlp:
+        enabled: false
+  simple:
+    metrics:
+      export:
+        enabled: false
 
 
 logging:
