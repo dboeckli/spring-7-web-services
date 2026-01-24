@@ -149,6 +149,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webservices</artifactId>
         </dependency>
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -199,15 +203,11 @@
             <artifactId>spring-boot-starter-webservices-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>wsdl4j</groupId>
-            <artifactId>wsdl4j</artifactId>
-            <optional>true</optional>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-restclient-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

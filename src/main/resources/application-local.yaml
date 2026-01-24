@@ -8,12 +8,6 @@ spring:
   webservices:
     wsdl-locations: classpath:META-INF/schemas/
 
-  docker:
-    compose:
-      enabled: false
-      stop:
-        command: down
-
 management:
   health:
     readinessstate:
