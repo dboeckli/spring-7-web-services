@@ -1,5 +1,6 @@
-package ch.dboeckli.soap.service.producingwebservice;
+package ch.dboeckli.soap.service.producingwebservice.rest;
 
+import ch.dboeckli.soap.service.producingwebservice.CountryRepository;
 import ch.dboeckli.soap.service.producingwebservice.schema.Country;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

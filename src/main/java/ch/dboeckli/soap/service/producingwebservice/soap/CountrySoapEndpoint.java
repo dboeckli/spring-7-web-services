@@ -1,5 +1,6 @@
-package ch.dboeckli.soap.service.producingwebservice;
+package ch.dboeckli.soap.service.producingwebservice.soap;
 
+import ch.dboeckli.soap.service.producingwebservice.CountryRepository;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
 import org.jspecify.annotations.NonNull;
