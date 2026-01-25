@@ -43,6 +43,7 @@
         <docker.repo>local</docker.repo>
 
         <libre-wsdl4j.version>1.12.0</libre-wsdl4j.version>
+        <camel-spring-boot.version>4.17.0</camel-spring-boot.version>
 
         <logstash-logback.version>9.0</logstash-logback.version>
 
@@ -139,6 +140,18 @@
         </repository>
     </distributionManagement>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.camel.springboot</groupId>
+                <artifactId>camel-spring-boot-bom</artifactId>
+                <version>${camel-spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -155,6 +168,11 @@
             <version>${libre-wsdl4j.version}</version>
         </dependency>
         <!-- end::wsdl4j[] -->
+
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-spring-boot-starter</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -179,6 +197,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-opentelemetry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-opentelemetry2-starter</artifactId>
         </dependency>
 
         <dependency>
@@ -226,6 +248,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-opentelemetry-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test-spring-junit5</artifactId>
             <scope>test</scope>
         </dependency>
 

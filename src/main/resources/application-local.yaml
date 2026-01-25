@@ -8,6 +8,16 @@ spring:
   webservices:
     wsdl-locations: classpath:META-INF/schemas/
 
+camel:
+  opentelemetry2:
+    enabled: true
+    traceProcessors: true
+  health:
+    enabled: true
+    routes-enabled: true
+    consumers-enabled: true
+    producers-enabled: true
+
 management:
   health:
     readinessstate:

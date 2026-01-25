@@ -1,7 +1,9 @@
-package ch.dboeckli.soap.service.producingwebservice;
+package ch.dboeckli.soap.service.producingwebservice.soap;
 
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
+import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
+import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +30,17 @@ public class CountrySoapEndpointTest {
         request.setName("Spain");
 
         GetCountryResponse response = (GetCountryResponse) template
+            .marshalSendAndReceive("http://localhost:%d/services".formatted(port), request);
+        assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
+    }
+
+    @Test
+    public void testV2SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
+        WebServiceTemplate template = builder.build();
+        GetCountryRequestV2 request = new GetCountryRequestV2();
+        request.setName("Spain");
+
+        GetCountryResponseV2 response = (GetCountryResponseV2) template
             .marshalSendAndReceive("http://localhost:%d/services".formatted(port), request);
         assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
     }

@@ -1,4 +1,4 @@
-package ch.dboeckli.soap.service.producingwebservice;
+package ch.dboeckli.soap.service.producingwebservice.rest;
 
 import ch.dboeckli.soap.service.producingwebservice.schema.Country;
 import ch.dboeckli.soap.service.producingwebservice.schema.Currency;

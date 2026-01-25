@@ -1,4 +1,4 @@
-package ch.dboeckli.soap.service.producingwebservice.config;
+package ch.dboeckli.soap.service.producingwebservice.soap.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
