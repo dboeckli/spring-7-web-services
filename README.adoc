@@ -90,7 +90,7 @@ NOTE: In all of these chunks of code, the `io.spring.guides` classes will report
 compile-time errors in your IDE unless you have run the task to generate the domain
 classes based on the WSDL.
 
-== Expose the web service
+== Expose the soap service
 
 Now we need to expose the service so that clients can fetch the WSDL definition.
 Spring Boot will scan all "*.xsd" and "*.wsdl" files in the configured location.
