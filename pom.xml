@@ -42,8 +42,7 @@
         <docker.image.tag>development</docker.image.tag> <!-- for feature branches -->
         <docker.repo>local</docker.repo>
 
-        <!-- our dependencies -->
-        <spring-7-rest-mvc-api.version>0.0.1-SNAPSHOT</spring-7-rest-mvc-api.version>
+        <libre-wsdl4j.version>1.12.0</libre-wsdl4j.version>
 
         <logstash-logback.version>9.0</logstash-logback.version>
 
@@ -149,10 +148,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webservices</artifactId>
         </dependency>
+        <!-- tag::wsdl4j[] -->
         <dependency>
-            <groupId>wsdl4j</groupId>
-            <artifactId>wsdl4j</artifactId>
+            <groupId>io.github.librewsdl4j</groupId>
+            <artifactId>libre-wsdl4j</artifactId>
+            <version>${libre-wsdl4j.version}</version>
         </dependency>
+        <!-- end::wsdl4j[] -->
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -499,6 +501,7 @@
                 </configuration>
             </plugin>
 
+            <!-- tag::xsd[] -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
@@ -520,8 +523,8 @@
                     <addGeneratedAnnotation>true</addGeneratedAnnotation>
                     <enableIntrospection>true</enableIntrospection>
                 </configuration>
-
             </plugin>
+            <!-- end::xsd[] -->
 
             <!-- we need a port to be able to start the local profile -->
             <plugin>

@@ -1,221 +1,149 @@
-= Spring Boot 7 Template Project/ TODO: FIXME
+= Spring Boot 4 Webservices Project
 
-see: https://spring.io/guides/gs/producing-web-service
-and
-see: https://spring.io/guides/gs/consuming-web-service
+:spring_version: current
+:spring_boot_version: current
+:spring_ws_api: https://docs.spring.io/spring-ws/docs/current/api
+:toc:
+:icons: font
+:source-highlighter: prettify
+:project_id: gs-soap-service
 
-== Introduction
-This project serves as a template for Spring Boot 4 applications. It provides a solid foundation for quickly starting new Spring Boot projects with pre-configured settings and best practices.
+This project is based on the guide from https://github.com/spring-guides/gs-producing-web-service/commits?author=bclozel:
 
-== Prerequisites
-* GitHub account
-* Git
-* JDK 25 or later
-* Maven
-* IntelliJ IDEA (recommended) or any preferred IDE
-* Docker account (for image publishing)
+- https://spring.io/guides/gs/producing-web-service
 
-== Getting Started
+== What You Will build
 
-=== 1. Project Setup
-. In GitHub, create a new project using this template.
-. In the new project's Settings:
-** Enable 'Automatically delete head branches'
-** Enable 'Always suggest updating pull request branches'
-. Set Branch Protection Rules similar to this template project. Do not Lock Master branch there.
+You will build a server that exposes data from various European countries by using a
+WSDL-based SOAP web service.
 
-=== 2. Local Development Setup
-. Clone the newly created project.
-. Configure Maven settings in your IDE:
-** Point to a valid `settings.xml` for GitHub dependency resolution.
-** Set local Maven repository outside of Microsoft's cloud (e.g., `C:\development\tools\maven-repo`).
-. Create a feature branch for your changes.
+NOTE: To simplify the example, you will use hardcoded data for the United Kingdom, Spain, and Poland.
 
-=== 3. Project Customization
-. Search for TODOs in the project and update the following:
-** Rename `group-id` and `artifact-id` in `pom.xml`
-** Update `name` in `application.yaml`
-** Ensure all names match your GitHub project name
-. Rename packages and classes as needed.
+== Add WSDL runtime dependency
 
-=== 4. GitHub Configuration
-. Add the following secrets in your GitHub project Action settings:
-** `DOCKER_USER`
-** `DOCKER_ACCESS_TOKEN`
-** `SONAR_TOKEN`: a Sonar Token generated in https://sonarcloud.io. Sonar Analysis Method: Automatic Analysis disabled.
-** `RELEASE_TOKEN`: A GitHub Personal Access Token with permissions to push to the master branch
-** To create this token:
-... Go to GitHub Settings > Developer settings > Personal access tokens
-... Click "Generate new token" (classic)
-... Give it a descriptive name (e.g., "Release Token for [Your Project Name]")
-... Set the expiration as needed
-... Select at least these scopes: `repo`, `write:packages`
-... Generate the token and copy it immediately
-** Add this token as a secret named `RELEASE_TOKEN` in your repository settings
-. Add the following vars in your GitHub project Action settings:
-** CI_USER and set value to dboeckli@gmail.com
-** CI_USER_EMAIL set value to dboeckli@gmail.com
-. Add the following secrets in your GitHub project Dependent Bot settings:
-** `DOCKER_USER`
-** `DOCKER_ACCESS_TOKEN`
+The service will require the wsdl4j dependency:
 
-=== 5. Build and Deployment
-. Trigger a rebuild in GitHub Actions.
-. Upon successful build:
-** A Docker image will be pushed to GitHub Packages and Docker Hub.
-** Access your Docker Hub repository: https://hub.docker.com/repositories/domboeckli
-** Change the Docker Hub image visibility from private to public to unlock it.
-
-=== 6. Release
-To create a new release:
-
-. Ensure you are on the main branch and it is up to date:
-. Run the release workflow:
-** Go to your GitHub repository
-** Navigate to the "Actions" tab
-** Select the "Maven Release" workflow
-** Click "Run workflow"
-** Choose the main branch and click "Run workflow"
-. The workflow will:
-** Check if you're on the main branch
-** Verify that the current version is a SNAPSHOT
-** Prepare the release (update versions, create tag)
-** Perform the release (build, test, and deploy)
-** Push changes back to the repository
-. After the workflow completes successfully:
-** A new release tag will be created in your repository
-** The project version in pom.xml will be updated
-** A new Docker image with the release version will be pushed to Docker Hub
-. Verify the release:
-** Check the releases page on GitHub
-** Confirm the new version in pom.xml on the main branch
-** Verify the new Docker image on Docker Hub
-
-NOTE: Ensure all required secrets (RELEASE_TOKEN, DOCKER_USER, DOCKER_ACCESS_TOKEN) are properly set in your GitHub repository settings before running the release workflow.
-
-== Deployment with Kubernetes
-
-To run maven filtering for destination target/k8s
-
-[source,bash]
+[source,xml,indent=0]
 ----
-mvn clean install -DskipTests
+include::pom.xml[tags=wsdl4j]
 ----
 
-Deployment goes into the default namespace.
+The original wsdl4j library (which apparently is not maintained anymore) has been replaced with libre-wsdl4j:
 
-To deploy all resources:
+- https://github.com/librewsdl4j/libre-wsdl4j
 
-[source,bash]
+== Create an XML Schema to Define the Domain
+
+The web service domain is defined in an XML schema file (XSD) that Spring-WS will
+automatically export as a WSDL.
+
+Create an XSD file with operations to return a country's `name`, `population`, `capital`,
+and `currency`. The following listing (from `src/main/resources/META-INF/schemas/countriesWs.xsd`) shows the
+necessary XSD file:
+
+[source,xml,indent=0]
 ----
-kubectl apply -f target/k8s/
-----
-
-To remove all resources:
-
-[source,bash]
-----
-kubectl delete -f target/k8s/
-----
-
-Check
-
-[source,bash]
-----
-kubectl get deployments -o wide
-kubectl get pods -o wide
+include::src/main/resources/META-INF/schemas/countriesWs.xsd[]
 ----
 
-You can use the actuator rest call to verify via port 30080
+== Generate Domain Classes Based on an XML Schema
 
-== Deployment with Helm
+The next step is to generate Java classes from the XSD file. The right approach is to do
+this automatically during build time by using a Maven  plugin.
 
-Be aware that we are using a different namespace here (not default).
+The following listing shows the necessary plugin configuration for Maven:
 
-To run maven filtering for destination target/helm
-
-[source,bash]
+[source,xml,indent=0]
 ----
-mvn clean install -DskipTests
-----
-
-Go to the directory where the tgz file has been created after 'mvn install'
-
-[source,powershell]
-----
-cd target/helm/repo
+include::pom.xml[tags=xsd]
 ----
 
-unpack
+Generated classes are placed in the `target/generated-sources/jaxb/` directory.
 
-[source,powershell]
-----
-$file = Get-ChildItem -Filter *.tgz | Select-Object -First 1
-tar -xvf $file.Name
-----
+The JAXB domain object generation process has been wired into the build
+tool's lifecycle, so there are no extra steps to run.
 
-install
+== The Country Service Endpoint
 
-[source,powershell]
-----
-$APPLICATION_NAME = Get-ChildItem -Directory | Where-Object { $_.LastWriteTime -ge $file.LastWriteTime } | Select-Object -ExpandProperty Name
-helm upgrade --install $APPLICATION_NAME ./$APPLICATION_NAME --namespace spring-7-project-template --create-namespace --wait --timeout 8m --debug --render-subchart-notes
-----
+To create a service endpoint, you need only a POJO with a few Spring WS annotations to
+handle the incoming SOAP requests. The following listing (from
+`src/main/java/ch/dboeckli/soap/service/producingwebservice/CountrySoapEndpoint`) shows such a class:
 
-show logs
-
-[source,powershell]
+[source,java]
 ----
-kubectl get pods -l app.kubernetes.io/name=$APPLICATION_NAME -n spring-7-project-template
+include::src/main/java/ch/dboeckli/soap/service/producingwebservice/CountrySoapEndpoint.java[]
 ----
 
-replace $POD with pods from the command above
+The `@Endpoint` annotation registers the class with Spring WS as a potential
+candidate for processing incoming SOAP messages.
 
-[source,powershell]
-----
-kubectl logs $POD -n spring-7-project-template --all-containers
-----
+The `@PayloadRoot` annotation is then used by Spring WS to pick the handler
+method, based on the message's `namespace` and `localPart`.
 
-test
+The `@RequestPayload` annotation indicates that the incoming message
+will be mapped to the method's `request` parameter.
 
-[source,powershell]
-----
-helm test $APPLICATION_NAME --namespace spring-7-project-template --logs
-----
+The `@ResponsePayload` annotation makes Spring WS map the returned
+value to the response payload.
 
-uninstall
+NOTE: In all of these chunks of code, the `io.spring.guides` classes will report
+compile-time errors in your IDE unless you have run the task to generate the domain
+classes based on the WSDL.
 
-[source,powershell]
-----
-helm uninstall $APPLICATION_NAME --namespace spring-7-project-template
-----
+== Expose the soap service
 
-delete all
+Now we need to expose the service so that clients can fetch the WSDL definition.
+Spring Boot will scan all "*.xsd" and "*.wsdl" files in the configured location.
+So first, we'll need to declare the location of our schema files by editing `src/main/resources/application-local.yaml`:
 
-[source,powershell]
+[source,yaml]
 ----
-kubectl delete all --all -n spring-7-project-template
-----
-
-create busybox sidecar
-
-[source,powershell]
-----
-kubectl run busybox-test --rm -it --image=busybox:1.36 --namespace=spring-7-project-template --command -- sh
+include::src/main/resources/application-local.yaml[]
 ----
 
-You can use the actuator rest call to verify via port 30080
+Spring Boot will create `SimpleXsdSchema` or `DefaultWsdl11Definition` beans with their names matching file names.
+Here, we can expect a `SimpleXsdSchema` bean named `countriesWs` and we can use it to create a WSDL bean for exposing it.
+For that, let's create a new `src/main/java/ch/dboeckli/soap/service/producingwebservice/config/WebServiceConfig.java` file
+with the following content:
 
-== Additional Information
-* The initial build in GitHub may fail. Follow the steps above to resolve any issues.
-* Ensure all TODOs are addressed before considering the setup complete.
-* For any issues or improvements, please create a GitHub issue in the project repository.
+[source,java]
+----
+include::src/main/java/ch/dboeckli/soap/service/producingwebservice/config/WebServiceConfig.java[]
+----
 
-== Contributing
-Contributions to improve this template are welcome. Please follow the standard GitHub flow:
+The `DefaultWsdl11Definition` exposes a standard WSDL 1.1 by using the configured `XsdSchema`.
 
-. Fork the repository
-. Create a feature branch
-. Commit your changes
-. Push to the branch
-. Create a new Pull Request
+IMPORTANT: The bean name for `DefaultWsdl11Definition` determines the URL under
+which the generated WSDL file is available. In this case, the WSDL will be available under
+`http://<host>:<port>/services/countries.wsdl`.
+
+By default, they will be exposed on the `"/services"` HTTP endpoint, but this can be customized
+with the `spring.webservices.path` property.
+
+== Test the Application
+
+use the http request file under:
+[source,json]
+----
+include::httpRequests/soapRequest/getCountryRequest.http[]
+----
+
+As a result, you should see the following response:
+
+[source,xml]
+----
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+    <ns2:getCountryResponse xmlns:ns2="https://spring.io/guides/gs-producing-web-service">
+      <ns2:country>
+        <ns2:name>Spain</ns2:name>
+        <ns2:population>46704314</ns2:population>
+        <ns2:capital>Madrid</ns2:capital>
+        <ns2:currency>EUR</ns2:currency>
+      </ns2:country>
+    </ns2:getCountryResponse>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+----
