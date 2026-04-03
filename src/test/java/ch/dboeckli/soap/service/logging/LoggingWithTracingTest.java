@@ -25,10 +25,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=DEBUG"
-)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=DEBUG")
 @AutoConfigureMockMvc
 @AutoConfigureMetrics
 @AutoConfigureTestRestTemplate
@@ -50,27 +48,26 @@ public class LoggingWithTracingTest {
 
             List<LogEvent> logEvents = logCaptor.getLogEvents();
 
-            assertAll(
-                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
-                () -> assertNotNull(logEvents),
-                () -> assertEquals(2, logEvents.size()),
-                () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getFirst().getLoggerName()),
-                () -> assertThat(logEvents.getFirst().getDiagnosticContext().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"), // in micrometer traceId: 32 Hex
-                () -> assertThat(logEvents.getFirst().getDiagnosticContext().get("spanId")).isNotBlank().matches("[0-9a-f]{16}"), // in micrometer spanId: 16 Hex
-                () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getLast().getLoggerName()),
-                () -> assertThat(logEvents.getLast().getDiagnosticContext().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"),
-                () -> assertThat(logEvents.getLast().getDiagnosticContext().get("spanId")).isNotBlank().matches("[0-9a-f]{16}"),
-                () -> assertEquals(
-                    logEvents.getFirst().getDiagnosticContext().get("traceId"),
-                    logEvents.getLast().getDiagnosticContext().get("traceId"),
-                    "traceId muss für Request/Response identisch sein"
-                ),
-                () -> assertEquals(
-                    logEvents.getFirst().getDiagnosticContext().get("spanId"),
-                    logEvents.getLast().getDiagnosticContext().get("spanId"),
-                    "spanId muss für Request/Response identisch sein"
-                )
-            );
+            assertAll(() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(logEvents),
+                    () -> assertEquals(2, logEvents.size()),
+                    () -> assertEquals(CommonsRequestLoggingFilter.class.getName(),
+                            logEvents.getFirst().getLoggerName()),
+                    () -> assertThat(logEvents.getFirst().getDiagnosticContext().get("traceId")).isNotBlank()
+                        .matches("[0-9a-f]{32}"), // in micrometer traceId: 32 Hex
+                    () -> assertThat(logEvents.getFirst().getDiagnosticContext().get("spanId")).isNotBlank()
+                        .matches("[0-9a-f]{16}"), // in micrometer spanId: 16 Hex
+                    () -> assertEquals(CommonsRequestLoggingFilter.class.getName(),
+                            logEvents.getLast().getLoggerName()),
+                    () -> assertThat(logEvents.getLast().getDiagnosticContext().get("traceId")).isNotBlank()
+                        .matches("[0-9a-f]{32}"),
+                    () -> assertThat(logEvents.getLast().getDiagnosticContext().get("spanId")).isNotBlank()
+                        .matches("[0-9a-f]{16}"),
+                    () -> assertEquals(logEvents.getFirst().getDiagnosticContext().get("traceId"),
+                            logEvents.getLast().getDiagnosticContext().get("traceId"),
+                            "traceId muss für Request/Response identisch sein"),
+                    () -> assertEquals(logEvents.getFirst().getDiagnosticContext().get("spanId"),
+                            logEvents.getLast().getDiagnosticContext().get("spanId"),
+                            "spanId muss für Request/Response identisch sein"));
         }
     }
 
@@ -85,28 +82,26 @@ public class LoggingWithTracingTest {
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         List<ILoggingEvent> logEvents = listAppender.list;
 
-        assertAll(
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
-            () -> assertNotNull(logEvents),
-            () -> assertEquals(2, logEvents.size()),
-            () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getFirst().getLoggerName()),
-            () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"), // in micrometer traceId: 32 Hex
-            () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("spanId")).isNotBlank().matches("[0-9a-f]{16}"), // in micrometer spanId: 16 Hex
-            () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getLast().getLoggerName()),
-            () -> assertThat(logEvents.getLast().getMDCPropertyMap().get("traceId")).isNotBlank().matches("[0-9a-f]{32}"),
-            () -> assertThat(logEvents.getLast().getMDCPropertyMap().get("spanId")).isNotBlank().matches("[0-9a-f]{16}"),
-            () -> assertEquals(
-                logEvents.getFirst().getMDCPropertyMap().get("traceId"),
-                logEvents.getLast().getMDCPropertyMap().get("traceId"),
-                "traceId muss für Request/Response identisch sein"
-            ),
-            () -> assertEquals(
-                logEvents.getFirst().getMDCPropertyMap().get("spanId"),
-                logEvents.getLast().getMDCPropertyMap().get("spanId"),
-                "spanId muss für Request/Response identisch sein"
-            )
-        );
+        assertAll(() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(logEvents),
+                () -> assertEquals(2, logEvents.size()),
+                () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getFirst().getLoggerName()),
+                () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("traceId")).isNotBlank()
+                    .matches("[0-9a-f]{32}"), // in micrometer traceId: 32 Hex
+                () -> assertThat(logEvents.getFirst().getMDCPropertyMap().get("spanId")).isNotBlank()
+                    .matches("[0-9a-f]{16}"), // in micrometer spanId: 16 Hex
+                () -> assertEquals(CommonsRequestLoggingFilter.class.getName(), logEvents.getLast().getLoggerName()),
+                () -> assertThat(logEvents.getLast().getMDCPropertyMap().get("traceId")).isNotBlank()
+                    .matches("[0-9a-f]{32}"),
+                () -> assertThat(logEvents.getLast().getMDCPropertyMap().get("spanId")).isNotBlank()
+                    .matches("[0-9a-f]{16}"),
+                () -> assertEquals(logEvents.getFirst().getMDCPropertyMap().get("traceId"),
+                        logEvents.getLast().getMDCPropertyMap().get("traceId"),
+                        "traceId muss für Request/Response identisch sein"),
+                () -> assertEquals(logEvents.getFirst().getMDCPropertyMap().get("spanId"),
+                        logEvents.getLast().getMDCPropertyMap().get("spanId"),
+                        "spanId muss für Request/Response identisch sein"));
         logger.detachAppender(listAppender);
         listAppender.stop();
     }
+
 }

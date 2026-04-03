@@ -16,13 +16,10 @@ class CountryRepositoryTest {
     void findCountryReturnsExpectedCountry() {
         Country result = repository.findCountry("Spain");
 
-        assertAll(
-            () -> assertThat(result).isNotNull(),
-            () -> assertThat(result.getName()).isEqualTo("Spain"),
-            () -> assertThat(result.getCapital()).isEqualTo("Madrid"),
-            () -> assertThat(result.getCurrency()).isEqualTo(Currency.EUR),
-            () -> assertThat(result.getPopulation()).isEqualTo(46_704_314)
-        );
+        assertAll(() -> assertThat(result).isNotNull(), () -> assertThat(result.getName()).isEqualTo("Spain"),
+                () -> assertThat(result.getCapital()).isEqualTo("Madrid"),
+                () -> assertThat(result.getCurrency()).isEqualTo(Currency.EUR),
+                () -> assertThat(result.getPopulation()).isEqualTo(46_704_314));
     }
 
     @Test
@@ -34,8 +31,8 @@ class CountryRepositoryTest {
 
     @Test
     void findCountryRejectsNullName() {
-        assertThatThrownBy(() -> repository.findCountry(null))
-            .isInstanceOf(IllegalArgumentException.class)
+        assertThatThrownBy(() -> repository.findCountry(null)).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must not be null");
     }
+
 }

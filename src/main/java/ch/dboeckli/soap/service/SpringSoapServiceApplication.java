@@ -14,4 +14,5 @@ public class SpringSoapServiceApplication {
         log.info("Starting Spring 6 Template Application...");
         SpringApplication.run(SpringSoapServiceApplication.class, args);
     }
+
 }

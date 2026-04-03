@@ -11,6 +11,7 @@ import org.springframework.util.ClassUtils;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class WebServiceTemplateConfiguration {
+
     @Bean
     WebServiceTemplateCustomizer marshallerCustomizer(Marshaller marshaller) {
         return (webServiceTemplate) -> webServiceTemplate.setMarshaller(marshaller);
@@ -27,4 +28,5 @@ public class WebServiceTemplateConfiguration {
         marshaller.setPackagesToScan(ClassUtils.getPackageName(GetCountryRequest.class));
         return marshaller;
     }
+
 }

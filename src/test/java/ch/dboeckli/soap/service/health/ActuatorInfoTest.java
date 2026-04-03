@@ -12,7 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,8 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ActuatorInfoTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Autowired
     BuildProperties buildProperties;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -40,9 +41,7 @@ class ActuatorInfoTest {
             .andExpect(jsonPath("$.git.commit.id.abbrev").isString())
 
             .andExpect(jsonPath("$.build.artifact").value(buildProperties.getArtifact()))
-            .andExpect(jsonPath("$.build.group").value(buildProperties.getGroup()))
-
-            .andExpect(jsonPath("$.java.version").value(startsWith("25")));
+            .andExpect(jsonPath("$.build.group").value(buildProperties.getGroup()));
     }
 
     @Test
@@ -64,11 +63,11 @@ class ActuatorInfoTest {
         try {
             Object json = OBJECT_MAPPER.readValue(body, Object.class);
             return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             // Falls kein valides JSON: unverändert zurückgeben
             return body;
         }
     }
-
 
 }

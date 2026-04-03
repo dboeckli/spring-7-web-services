@@ -17,4 +17,5 @@ public class WebServiceConfig {
         wsdl11Definition.setSchema(countriesWs);
         return wsdl11Definition;
     }
+
 }

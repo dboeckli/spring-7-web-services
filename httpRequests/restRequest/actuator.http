@@ -30,6 +30,19 @@ Accept: application/octet-stream
 GET localhost:{{application-port}}/actuator/metrics
 Accept: application/json
 
+### actuator metrics
+GET localhost:{{application-port}}/actuator/camel/
+Accept: application/json
+
+### actuator metrics
+GET localhost:{{application-port}}/actuator/camelroutecontroller
+Accept: application/json
+
+### actuator metrics
+GET localhost:{{application-port}}/actuator/camelroutes
+Accept: application/json
+
+
 ### actuator env
 GET localhost:{{application-port}}/actuator/env
 Accept: application/json
