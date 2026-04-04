@@ -24,10 +24,7 @@ public class CountrySoapEndpointV2 {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getCountryRequestV2")
     @ResponsePayload
     public GetCountryResponseV2 getCountryV2(@RequestPayload @NonNull GetCountryRequestV2 request) {
-        return producerTemplate.requestBody(
-                CountryCamelRoute.DIRECT_GET_COUNTRY,
-                request,
-                GetCountryResponseV2.class
-        );
+        return producerTemplate.requestBody(CountryCamelRoute.DIRECT_GET_COUNTRY, request, GetCountryResponseV2.class);
     }
+
 }

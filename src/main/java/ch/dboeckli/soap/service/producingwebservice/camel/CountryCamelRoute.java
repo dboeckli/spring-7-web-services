@@ -22,9 +22,9 @@ public class CountryCamelRoute extends RouteBuilder {
 
     @Override
     public void configure() {
-        from(DIRECT_GET_COUNTRY)
-            .routeId("country-get")
+        from(DIRECT_GET_COUNTRY).routeId("country-get")
             .log(LoggingLevel.INFO, "country-get", "# body before transform is: ${body}")
+            .id("log-country-get")
             .process(exchange -> {
                 Object body = exchange.getMessage().getBody();
                 log.info("Received GetCountryRequestV2 request: {}", body);
@@ -34,7 +34,10 @@ public class CountryCamelRoute extends RouteBuilder {
                     exchange.getMessage().setBody(response);
                     return;
                 }
-                throw new IllegalArgumentException("Unsupported request type: " + (body == null ? "null" : body.getClass().getName()));
-            });
+                throw new IllegalArgumentException(
+                        "Unsupported request type: " + (body == null ? "null" : body.getClass().getName()));
+            })
+            .id("process-exchange");
     }
+
 }

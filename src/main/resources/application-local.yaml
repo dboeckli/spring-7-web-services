@@ -1,13 +1,16 @@
+---
 server:
   port: 8080
-
 spring:
   application:
-    name: spring-7-web-services
-
+    name: "spring-7-web-services"
+  docker:
+    compose:
+      enabled: true
+      stop:
+        command: "down"
   webservices:
-    wsdl-locations: classpath:META-INF/schemas/
-
+    wsdl-locations: "classpath:META-INF/schemas/"
 camel:
   opentelemetry2:
     enabled: true
@@ -17,7 +20,6 @@ camel:
     routes-enabled: true
     consumers-enabled: true
     producers-enabled: true
-
 management:
   health:
     readinessstate:
@@ -26,20 +28,20 @@ management:
       enabled: true
   endpoints:
     access:
-      default: unrestricted
+      default: "unrestricted"
     web:
       exposure:
         include: "*"
   endpoint:
     configprops:
-      # WARNING: SECURITY RISK - DO NOT USE IN PRODUCTION ENVIRONMENT
-      # This configuration exposes sensitive data and should only be used for development or testing purposes.
-      # Ensure this is disabled in any environment where security is a concern.
-      show-values: ALWAYS
+      show-values: "ALWAYS"
     health:
       probes:
         enabled: true
-      show-details: always
+      show-details: "always"
+    camelroutes:
+      read-only: true
+      access: "unrestricted"
   info:
     build:
       enabled: true
@@ -51,44 +53,47 @@ management:
       enabled: true
     git:
       enabled: true
-      mode: full
+      mode: "full"
   httpexchanges:
     recording:
       enabled: true
-      include: request_headers, response_headers, session_id, time_taken
+      include: "request_headers, response_headers, session_id, time_taken"
   observations:
     annotations:
       enabled: true
     http:
       server:
         requests:
-          name: http.server.requests
+          name: "http.server.requests"
       client:
         requests:
-          name: http-client-requests
-
+          name: "http-client-requests"
   otlp:
     metrics:
       export:
-        enabled: false
+        enabled: true
+        url: "http://localhost:4318/v1/metrics"
+        step: "10s"
   tracing:
     export:
       otlp:
-        enabled: false
+        enabled: true
     sampling:
       probability: 1.0
-
   logging:
     export:
       enabled: false
       otlp:
         enabled: false
-  simple:
-    metrics:
+  opentelemetry:
+    resource-attributes:
+      service.namespace: "spring-7-web-services"
+      deployment.environment: "local"
+      service.node.name: "gugus"
+    tracing:
       export:
-        enabled: false
-
-
+        otlp:
+          endpoint: "http://localhost:4318/v1/traces"
 logging:
   level:
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: "DEBUG"

@@ -25,11 +25,9 @@ class CountryCamelRouteTest {
         GetCountryRequest request = new GetCountryRequest();
         request.setName("Spain");
 
-        assertThatThrownBy(() -> producerTemplate.requestBody(
-            CountryCamelRoute.DIRECT_GET_COUNTRY,
-            request,
-            GetCountryResponse.class
-        )).hasRootCauseInstanceOf(IllegalArgumentException.class)
+        assertThatThrownBy(() -> producerTemplate.requestBody(CountryCamelRoute.DIRECT_GET_COUNTRY, request,
+                GetCountryResponse.class))
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
             .hasRootCauseMessage("Unsupported request type: " + request.getClass().getName());
     }
 
@@ -38,12 +36,10 @@ class CountryCamelRouteTest {
         GetCountryRequestV2 request = new GetCountryRequestV2();
         request.setName("Spain");
 
-        GetCountryResponseV2 response = producerTemplate.requestBody(
-            CountryCamelRoute.DIRECT_GET_COUNTRY,
-            request,
-            GetCountryResponseV2.class
-        );
+        GetCountryResponseV2 response = producerTemplate.requestBody(CountryCamelRoute.DIRECT_GET_COUNTRY, request,
+                GetCountryResponseV2.class);
 
         assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
     }
+
 }

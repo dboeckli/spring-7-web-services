@@ -26,18 +26,18 @@ class CountryRestControllerTest {
         Country result = restTestClient.get()
             .uri("/api/countries/{name}", "Spain")
             .exchange()
-            .expectStatus().isOk()
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectStatus()
+            .isOk()
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
             .expectBody(Country.class)
             .returnResult()
             .getResponseBody();
 
-        assertAll(
-            () -> assertThat(result).isNotNull(),
-            () -> assertThat(result.getName()).isEqualTo("Spain"),
-            () -> assertThat(result.getCapital()).isEqualTo("Madrid"),
-            () -> assertThat(result.getCurrency()).isEqualTo(Currency.EUR),
-            () -> assertThat(result.getPopulation()).isEqualTo(46_704_314)
-        );
+        assertAll(() -> assertThat(result).isNotNull(), () -> assertThat(result.getName()).isEqualTo("Spain"),
+                () -> assertThat(result.getCapital()).isEqualTo("Madrid"),
+                () -> assertThat(result.getCurrency()).isEqualTo(Currency.EUR),
+                () -> assertThat(result.getPopulation()).isEqualTo(46_704_314));
     }
+
 }
