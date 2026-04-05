@@ -14,12 +14,12 @@ public class WebServiceTemplateConfiguration {
 
     @Bean
     WebServiceTemplateCustomizer marshallerCustomizer(Marshaller marshaller) {
-        return (webServiceTemplate) -> webServiceTemplate.setMarshaller(marshaller);
+        return webServiceTemplate -> webServiceTemplate.setMarshaller(marshaller);
     }
 
     @Bean
     WebServiceTemplateCustomizer unmarshallerCustomizer(Unmarshaller unmarshaller) {
-        return (webServiceTemplate) -> webServiceTemplate.setUnmarshaller(unmarshaller);
+        return webServiceTemplate -> webServiceTemplate.setUnmarshaller(unmarshaller);
     }
 
     @Bean

@@ -89,7 +89,6 @@ management:
     resource-attributes:
       service.namespace: "spring-7-web-services"
       deployment.environment: "local"
-      service.node.name: "gugus"
     tracing:
       export:
         otlp:

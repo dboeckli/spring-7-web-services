@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestRestTemplate
 @Slf4j
 @ActiveProfiles("local")
-public class LoggingWithTracingTest {
+class LoggingWithTracingTest {
 
     @LocalServerPort
     int port;
