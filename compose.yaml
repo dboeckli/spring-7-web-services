@@ -24,7 +24,7 @@ services:
     - "COLLECTOR_OTLP_ENABLED=true"
     restart: "unless-stopped"
   zipkin:
-    image: "openzipkin/zipkin:3.6.0"
+    image: "openzipkin/zipkin:3.6.1"
     container_name: "zipkin"
     ports:
     - "9411:9411"
