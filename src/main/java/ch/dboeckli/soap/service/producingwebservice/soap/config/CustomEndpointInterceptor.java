@@ -17,7 +17,7 @@ public class CustomEndpointInterceptor implements EndpointInterceptor {
             Span currentSpan = Span.current();
             if (currentSpan != null && currentSpan.isRecording()) {
                 currentSpan.setAttribute("soap.method", methodEndpoint.getMethod().getName());
-                currentSpan.setAttribute("soap.endpoint", endpoint.getClass().getSimpleName());
+                currentSpan.setAttribute("soap.endpoint", methodEndpoint.getBean().getClass().getName());
             }
         }
         return true;
@@ -25,7 +25,9 @@ public class CustomEndpointInterceptor implements EndpointInterceptor {
 
     @Override
     public boolean handleResponse(@NonNull MessageContext messageContext, @NonNull Object endpoint) {
-        log.debug("Endpoint Response Handling");
+        if (endpoint instanceof MethodEndpoint methodEndpoint) {
+            log.debug("soap.response name: {}", methodEndpoint.getBean().getClass().getName());
+        }
         return true;
     }
 
