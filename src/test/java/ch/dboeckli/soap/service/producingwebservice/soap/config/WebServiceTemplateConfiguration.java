@@ -1,4 +1,4 @@
-package ch.dboeckli.soap.service.producingwebservice.soap;
+package ch.dboeckli.soap.service.producingwebservice.soap.config;
 
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
 import org.springframework.boot.test.context.TestConfiguration;

@@ -1,4 +1,4 @@
-package ch.dboeckli.soap.service.producingwebservice.soap;
+package ch.dboeckli.soap.service.producingwebservice.soap.config;
 
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -11,4 +11,5 @@ public class OpenTelemetryTestConfiguration {
     public InMemorySpanExporter inMemorySpanExporter() {
         return InMemorySpanExporter.create();
     }
+
 }
