@@ -59,8 +59,9 @@ class CountrySoapEndpointV2SliceTest {
 
         GetCountryResponseV2 mockedResponse = new GetCountryResponseV2();
         mockedResponse.setCountry(spain);
-        when(producerTemplate.requestBody(any(String.class), any(GetCountryRequestV2.class), eq(GetCountryResponseV2.class)))
-                .thenReturn(mockedResponse);
+        when(producerTemplate.requestBody(any(String.class), any(GetCountryRequestV2.class),
+                eq(GetCountryResponseV2.class)))
+            .thenReturn(mockedResponse);
 
         GetCountryRequestV2 request = new GetCountryRequestV2();
         request.setName("Spain");
@@ -71,9 +72,9 @@ class CountrySoapEndpointV2SliceTest {
 
         GetCountryResponseV2[] holder = new GetCountryResponseV2[1];
         client.sendRequest(withPayload(requestPayload))
-                .andExpect(noFault())
-                .andExpect(
-                        (req, res) -> holder[0] = (GetCountryResponseV2) jaxb2Marshaller.unmarshal(res.getPayloadSource()));
+            .andExpect(noFault())
+            .andExpect(
+                    (req, res) -> holder[0] = (GetCountryResponseV2) jaxb2Marshaller.unmarshal(res.getPayloadSource()));
 
         assertThat(holder[0].getCountry().getCapital()).isEqualTo("Madrid");
         assertThat(holder[0].getCountry().getCurrency()).isEqualTo(Currency.EUR);
