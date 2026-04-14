@@ -22,7 +22,7 @@ public class CountryCamelRoute extends RouteBuilder {
 
     @Override
     public void configure() {
-        from(DIRECT_GET_COUNTRY).routeId("country-get")
+        from(DIRECT_GET_COUNTRY).routeId(DIRECT_GET_COUNTRY)
             .log(LoggingLevel.INFO, "country-get", "# body before transform is: ${body}")
             .id("log-country-get")
             .process(exchange -> {

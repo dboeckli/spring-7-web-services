@@ -4,8 +4,13 @@ import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
+import ch.dboeckli.soap.service.producingwebservice.soap.config.OpenTelemetryTestConfiguration;
+import ch.dboeckli.soap.service.producingwebservice.soap.config.WebServiceTemplateConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.webservices.client.WebServiceTemplateBuilder;
@@ -15,10 +20,14 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(WebServiceTemplateConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = { "management.otlp.metrics.export.enabled=false" })
+@Import({ WebServiceTemplateConfiguration.class, OpenTelemetryTestConfiguration.class })
+@Slf4j
+@AutoConfigureTracing
+@AutoConfigureMetrics
 @ActiveProfiles("local")
-public class CountrySoapEndpointTest {
+class CountrySoapEndpointIT {
 
     @LocalServerPort
     private int port;
