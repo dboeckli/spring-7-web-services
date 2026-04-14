@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = { "management.otlp.metrics.export.enabled=false" })
+        properties = { "management.otlp.metrics.export.enabled=false", "spring.docker.compose.skip.in-tests=false" })
 @Import({ WebServiceTemplateConfiguration.class, OpenTelemetryTestConfiguration.class })
 @Slf4j
 @AutoConfigureTracing

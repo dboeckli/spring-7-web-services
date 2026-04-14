@@ -9,6 +9,8 @@ spring:
       enabled: true
       stop:
         command: "down"
+      skip:
+        in-tests: true
   webservices:
     wsdl-locations: "classpath:META-INF/schemas/"
 camel:
