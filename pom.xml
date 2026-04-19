@@ -681,6 +681,9 @@
               <skip>${skip.docker.build}</skip>
               <image>
                 <name>local/${project.artifactId}:${project.version}</name>
+                <env>
+                  <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                </env>
                 <tags>local/${project.artifactId}:${docker.image.tag}</tags>
                 <publish>false</publish>
               </image>
@@ -727,6 +730,9 @@
               <image>
                 <!--suppress UnresolvedMavenProperty: DOCKER_USER is set by GitHub Actions -->
                 <name>${env.DOCKER_USER}/${project.artifactId}:${project.version}</name>
+                <env>
+                  <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                </env>
                 <tags>
                   <!--suppress UnresolvedMavenProperty: DOCKER_USER is set by GitHub Actions -->
                   ${env.DOCKER_USER}/${project.artifactId}:${docker.image.tag}
