@@ -341,15 +341,9 @@
           </json>
           <yaml>
             <includes>
-              <include>**/*.yaml</include>
-              <include>**/*.yml</include>
+              <include>application.yaml</include>
+              <include>application.yml</include>
             </includes>
-            <excludes>
-              <exclude>target/**</exclude>
-              <exclude>**/node_modules/**</exclude>
-              <exclude>helm-charts/**</exclude>
-              <exclude>.github/**</exclude>
-            </excludes>
             <jackson>
               <version>2.21.2</version>
             </jackson>
@@ -687,6 +681,9 @@
               <skip>${skip.docker.build}</skip>
               <image>
                 <name>local/${project.artifactId}:${project.version}</name>
+                <env>
+                  <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                </env>
                 <tags>local/${project.artifactId}:${docker.image.tag}</tags>
                 <publish>false</publish>
               </image>
@@ -702,6 +699,9 @@
             <configuration>
               <skip>${skip.docker.publish}</skip>
               <image>
+                <env>
+                  <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                </env>
                 <name>ghcr.io/${project.organization.name}/${project.artifactId}:${project.version}</name>
                 <tags>ghcr.io/${project.organization.name}/${project.artifactId}:${docker.image.tag}</tags>
                 <publish>true</publish>
@@ -730,6 +730,9 @@
               <image>
                 <!--suppress UnresolvedMavenProperty: DOCKER_USER is set by GitHub Actions -->
                 <name>${env.DOCKER_USER}/${project.artifactId}:${project.version}</name>
+                <env>
+                  <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                </env>
                 <tags>
                   <!--suppress UnresolvedMavenProperty: DOCKER_USER is set by GitHub Actions -->
                   ${env.DOCKER_USER}/${project.artifactId}:${docker.image.tag}
