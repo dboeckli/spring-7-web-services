@@ -696,6 +696,9 @@
             <configuration>
               <skip>${skip.docker.publish}</skip>
               <image>
+                <env>
+                  <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                </env>
                 <name>ghcr.io/${project.organization.name}/${project.artifactId}:${project.version}</name>
                 <tags>ghcr.io/${project.organization.name}/${project.artifactId}:${docker.image.tag}</tags>
                 <publish>true</publish>
