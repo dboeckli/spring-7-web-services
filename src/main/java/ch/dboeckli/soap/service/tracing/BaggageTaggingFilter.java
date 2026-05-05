@@ -17,32 +17,20 @@ import java.io.IOException;
 public class BaggageTaggingFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        
-        Baggage updatedBaggage = Baggage.current().toBuilder()
-                .put("addedBaggege", "echo")
-                .build();
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
-        try (Scope scope = updatedBaggage.makeCurrent()) {
+        Baggage updatedBaggage = Baggage.current().toBuilder().put("addedBaggage", "echo").build();
 
-            // 3. Optional: Alle Baggage-Felder (inkl. des neuen) als Span-Attribute setzen
+        try (Scope ignored = updatedBaggage.makeCurrent()) {
+            // 3. Optional: Alle Baggage-Felder (inkl. des neuen) als Span-Attribute
+            // setzen
             // Damit sie in Elastic APM als Labels erscheinen
-            updatedBaggage.asMap().forEach((key, entry) -> {
-                io.opentelemetry.api.trace.Span.current().setAttribute(key, entry.getValue());
-            });
-
-            addBaggageFieldsToSpan(updatedBaggage);
-
+            updatedBaggage.asMap().forEach((key, entry) -> Span.current().setAttribute(key, entry.getValue()));
             // 4. Den Request weiterlaufen lassen (innerhalb des Scopes!)
             filterChain.doFilter(request, response);
         }
 
     }
 
-    private void addBaggageFieldsToSpan(Baggage baggage) {
-        baggage.asMap().forEach((key, entry) -> {
-            Span.current().setAttribute("baggage." + key, entry.getValue());
-        });
-    }
 }

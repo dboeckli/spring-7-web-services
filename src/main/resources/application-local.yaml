@@ -87,12 +87,12 @@ management:
     baggage:
       enabled: true
       remote-fields:
-        - testBaggage,addedBaggege # Erlaubt das Empfangen des Headers "baggage: test1=..."
+        - testBaggage,addedBaggage # Erlaubt das Empfangen des Headers "baggage: test1=..."
       tag-fields:
-        - testBaggage,addedBaggege # KOPIERT den Wert aus dem Baggage in die Span-Labels (Attributes)
+        - testBaggage,addedBaggage # KOPIERT den Wert aus dem Baggage in die Span-Labels (Attributes)
       correlation:
         fields:
-          - testBaggage,addedBaggege
+          - testBaggage,addedBaggage
   logging:
     export:
       enabled: false

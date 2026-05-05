@@ -24,8 +24,8 @@ public class CountryRestController {
 
     @GetMapping(value = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Country> getCountry(@PathVariable String name) {
-        String baggageValue = Baggage.current().getEntryValue("test1");
-        log.info("Empfangener Baggage-Wert 'test1': {}", baggageValue);
+        String baggageValue = Baggage.current().getEntryValue("testBaggage");
+        log.info("Empfangener Baggage-Wert 'testBaggage': {}", baggageValue);
 
         Country country = countryRepository.findCountry(name);
         if (country == null) {
