@@ -2,5 +2,6 @@
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
+baggage: testBaggage=hallo
 
 < ./getCountryRequestV2.xml

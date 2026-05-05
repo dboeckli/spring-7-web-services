@@ -1,3 +1,4 @@
 ### Get Country by Name (Madrid)
 GET http://localhost:8080/api/countries/Spain
 Accept: application/json
+baggage: testBaggage=hallo

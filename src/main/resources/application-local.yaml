@@ -82,6 +82,17 @@ management:
         enabled: true
     sampling:
       probability: 1.0
+    propagation:
+      type: w3c
+    baggage:
+      enabled: true
+      remote-fields:
+        - testBaggage,addedBaggage # Erlaubt das Empfangen des Headers "baggage: test1=..."
+      tag-fields:
+        - testBaggage,addedBaggage # KOPIERT den Wert aus dem Baggage in die Span-Labels (Attributes)
+      correlation:
+        fields:
+          - testBaggage,addedBaggage
   logging:
     export:
       enabled: false
@@ -95,6 +106,7 @@ management:
       export:
         otlp:
           endpoint: "http://localhost:4318/v1/traces"
+
 logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: "DEBUG"
