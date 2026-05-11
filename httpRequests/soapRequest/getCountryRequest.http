@@ -1,7 +1,24 @@
 ### SOAP Request for getCountryRequest
+< {%
+    function randomHex(length) {
+        let result = '';
+        const chars = '0123456789abcdef';
+        for (let i = 0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+
+    const traceId = randomHex(32);
+    const spanId  = randomHex(16);
+
+    request.variables.set("traceId", traceId);
+    request.variables.set("spanId", spanId);
+%}
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
+traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4737-00f067aa0ba902b7-01
 baggage: testBaggage=hallo
 
 < ./getCountryRequest.xml
