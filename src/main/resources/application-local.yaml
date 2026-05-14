@@ -80,19 +80,24 @@ management:
     export:
       otlp:
         enabled: true
+      enabled: true
     sampling:
       probability: 1.0
     propagation:
-      type: w3c
+      type: W3C
+      consume: W3C
+      produce: W3C
     baggage:
       enabled: true
+      # Specify which baggage fields should be propagated to downstream services
       remote-fields:
         - testBaggage,addedBaggage # Erlaubt das Empfangen des Headers "baggage: test1=..."
       tag-fields:
         - testBaggage,addedBaggage # KOPIERT den Wert aus dem Baggage in die Span-Labels (Attributes)
       correlation:
         fields:
-          - testBaggage,addedBaggage
+          - testBaggage,addedBaggage # Also make baggage available in MDC for logging
+        enabled: true
   logging:
     export:
       enabled: false
@@ -110,3 +115,5 @@ management:
 logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: "DEBUG"
+    io.micrometer.tracing: DEBUG
+    io.opentelemetry: DEBUG
