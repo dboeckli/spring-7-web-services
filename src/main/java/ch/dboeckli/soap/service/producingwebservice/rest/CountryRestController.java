@@ -4,6 +4,7 @@ import ch.dboeckli.soap.service.producingwebservice.CountryRepository;
 import ch.dboeckli.soap.service.producingwebservice.schema.Country;
 import io.opentelemetry.api.baggage.Baggage;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +25,11 @@ public class CountryRestController {
 
     @GetMapping(value = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Country> getCountry(@PathVariable String name) {
-        String baggageValue = Baggage.current().getEntryValue("testBaggage");
-        log.info("Empfangener Baggage-Wert 'testBaggage': {}", baggageValue);
+        String testBaggage = Baggage.current().getEntryValue("testBaggage");
+        log.info("Empfangener Baggage-Wert 'testBaggage': {}", testBaggage);
+        String addedBaggage = Baggage.current().getEntryValue("addedBaggage");
+        log.info("Empfangener Baggage-Wert 'addedBaggage': {}", addedBaggage);
+        log.info("MDC-Inhalt: {}", MDC.getCopyOfContextMap());
 
         Country country = countryRepository.findCountry(name);
         if (country == null) {

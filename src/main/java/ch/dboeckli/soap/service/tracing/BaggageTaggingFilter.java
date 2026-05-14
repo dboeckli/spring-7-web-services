@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class BaggageTaggingFilter extends OncePerRequestFilter {
 
     @Override
@@ -21,6 +23,9 @@ public class BaggageTaggingFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         Baggage updatedBaggage = Baggage.current().toBuilder().put("addedBaggage", "echo").build();
+
+        String traceParent = request.getHeader("traceparent");
+        log.info("traceparent: {}", traceParent);
 
         try (Scope ignored = updatedBaggage.makeCurrent()) {
             // 3. Optional: Alle Baggage-Felder (inkl. des neuen) als Span-Attribute
