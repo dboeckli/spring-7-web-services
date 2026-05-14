@@ -18,7 +18,15 @@
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
-traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4737-00f067aa0ba902b7-01
+traceparent: 00-{{traceId}}-{{spanId}}-01
+baggage: testBaggage=hallo
+
+< ./getCountryRequest.xml
+
+### SOAP Request for getCountryRequest without traceparent
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
 baggage: testBaggage=hallo
 
 < ./getCountryRequest.xml

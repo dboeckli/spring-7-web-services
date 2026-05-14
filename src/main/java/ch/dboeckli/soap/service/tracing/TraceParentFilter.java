@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,6 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class TraceParentFilter extends OncePerRequestFilter {
 
     private final Tracer tracer;
@@ -22,18 +24,36 @@ public class TraceParentFilter extends OncePerRequestFilter {
     }
 
     @Override
-    // we set the traceparent header if it is not present in the request
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
-
-        filterChain.doFilter(request, response);
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         Span currentSpan = tracer.currentSpan();
-        if (currentSpan != null) {
+        log.info("### currentSpan: {}", currentSpan);
+
+        if (currentSpan == null) {
+            log.warn("No active span found, skipping traceparent header.");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String traceParent = request.getHeader("traceparent");
+        if (traceParent == null || traceParent.isBlank()) {
+            log.info("Traceparent was null or empty, setting traceparent header.");
+
             String traceId = currentSpan.context().traceId();
             String spanId = currentSpan.context().spanId();
-            response.setHeader("traceparent", "00-" + traceId + "-" + spanId + "-01");
+
+            String traceParentValue = String.format("00-%s-%s-01", traceId, spanId);
+            log.info("Setting traceparent header: {}", traceParentValue);
+
+            response.setHeader("traceparent", traceParentValue);
         }
+        else {
+            log.info("Traceparent already present: {}", traceParent);
+        }
+
+        // DANACH: Request verarbeiten
+        filterChain.doFilter(request, response);
     }
 
 }
