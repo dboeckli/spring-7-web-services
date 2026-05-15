@@ -55,6 +55,7 @@
     <camel-spring-boot.version>4.20.0</camel-spring-boot.version>
 
     <logstash-logback.version>9.0</logstash-logback.version>
+    <logback-ecs-encoder.version>1.8.0</logback-ecs-encoder.version>
 
     <!-- plugins -->
     <spring-javaformat-maven-plugin.version>0.0.47</spring-javaformat-maven-plugin.version>
@@ -134,6 +135,12 @@
       <groupId>net.logstash.logback</groupId>
       <artifactId>logstash-logback-encoder</artifactId>
       <version>${logstash-logback.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>co.elastic.logging</groupId>
+      <artifactId>logback-ecs-encoder</artifactId>
+      <version>${logback-ecs-encoder.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
