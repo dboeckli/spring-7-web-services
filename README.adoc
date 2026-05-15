@@ -78,7 +78,7 @@ handle the incoming SOAP requests. The following listing (from
 
 [source,java]
 ----
-include::src/main/java/ch/dboeckli/soap/service/producingwebservice/CountrySoapEndpoint.java[]
+include::src/main/java/ch/dboeckli/soap/service/producingwebservice/soap/CountrySoapEndpoint.java[]
 ----
 
 The `@Endpoint` annotation registers the class with Spring WS as a potential
@@ -115,7 +115,7 @@ with the following content:
 
 [source,java]
 ----
-include::src/main/java/ch/dboeckli/soap/service/producingwebservice/config/WebServiceConfig.java[]
+include::src/main/java/ch/dboeckli/soap/service/producingwebservice/soap/config/WebServiceConfig.java[]
 ----
 
 The `DefaultWsdl11Definition` exposes a standard WSDL 1.1 by using the configured `XsdSchema`.
@@ -127,10 +127,17 @@ which the generated WSDL file is available. In this case, the WSDL will be avail
 By default, they will be exposed on the `"/services"` HTTP endpoint, but this can be customized
 with the `spring.webservices.path` property.
 
+== OpenTelemetry Resources
+
+Useful links for OpenTelemetry integration with Spring Boot:
+
+- https://uptrace.dev/guides/opentelemetry-spring-boot[OpenTelemetry Spring Boot Guide]
+- https://uptrace.dev/get/opentelemetry-java/traceparent[TraceParent in OpenTelemetry Java]
+
 == Test the Application
 
 use the http request file under:
-[source,json]
+[source,httprequest]
 ----
 include::httpRequests/soapRequest/getCountryRequest.http[]
 ----
@@ -154,3 +161,5 @@ As a result, you should see the following response:
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 ----
+
+

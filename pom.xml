@@ -151,6 +151,12 @@
     </dependency>
 
     <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+
+    <!-- https://uptrace.dev/guides/opentelemetry-spring-boot -->
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-opentelemetry</artifactId>
     </dependency>
@@ -211,6 +217,12 @@
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-test</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -335,6 +347,7 @@
               <exclude>target/**</exclude>
               <exclude>**/node_modules/**</exclude>
               <exclude>.github/**</exclude>
+              <exclude>.claude/**</exclude>
             </excludes>
             <jackson>
               <version>2.21.2</version>

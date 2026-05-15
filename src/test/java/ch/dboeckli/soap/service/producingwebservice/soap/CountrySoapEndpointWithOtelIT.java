@@ -4,7 +4,7 @@ import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
-import ch.dboeckli.soap.service.producingwebservice.soap.config.OpenTelemetryTestConfiguration;
+import ch.dboeckli.soap.service.producingwebservice.common.config.OpenTelemetryTestConfiguration;
 import ch.dboeckli.soap.service.producingwebservice.soap.config.WebServiceTemplateConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
