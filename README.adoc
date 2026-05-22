@@ -27,7 +27,7 @@ image::image-2026-04-11-13-52-29-340.png[]
 
 Key characteristics of SOAP messages in this web service:
 
-* The request messages (like `getCountryRequest`) are sent in the SOAP Body
+* The request messages (like `getCountryRequest`) are sent in the SOAP Body.
 * The responses (like `getCountryResponse`) are returned in the SOAP Body
 * Any errors would be returned as SOAP Faults in the response
 
