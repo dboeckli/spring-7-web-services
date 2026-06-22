@@ -168,6 +168,10 @@
       <artifactId>spring-boot-starter-opentelemetry</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aspectj</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.camel.springboot</groupId>
       <artifactId>camel-opentelemetry2-starter</artifactId>
     </dependency>

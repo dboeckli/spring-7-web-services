@@ -21,12 +21,6 @@ Accept: application/json
 traceparent: 00-{{traceId}}-{{spanId}}-01
 baggage: testBaggage=hallo
 
-### Get Country by Name (Madrid)
-GET http://localhost:8080/api/countries/Spain
-Accept: application/json
-traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
-baggage: testBaggage=hallo
-
 ### Get Country by Name (Madrid) without traceparent
 GET http://localhost:8080/api/countries/Spain
 Accept: application/json

@@ -3,8 +3,11 @@ package ch.dboeckli.soap.service.producingwebservice.camel;
 import ch.dboeckli.soap.service.producingwebservice.CountryRepository;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
+import io.opentelemetry.api.baggage.Baggage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +25,29 @@ public class CountryCamelRoute extends RouteBuilder {
 
     @Override
     public void configure() {
+        // V3 SOAP-Eingang via Camel – technischer Test, nutzt V2-Objekte
+        from("spring-ws:rootqname:{https://spring.io/guides/gs-producing-web-service}getCountryRequestV3"
+                + "?endpointMapping=#endpointMapping")
+            .routeId("soap-get-country-v3-camel")
+            .log(LoggingLevel.INFO, "country-get", "# V3 (Camel) SOAP request received")
+            .unmarshal()
+            .jaxb("dein.jaxb.package") // XML -> GetCountryRequest
+            .to(DIRECT_GET_COUNTRY)
+            .marshal()
+            .jaxb("dein.jaxb.package");
+
         from(DIRECT_GET_COUNTRY).routeId(DIRECT_GET_COUNTRY)
+            .setProperty("CamelBaggage_myValue", constant("1234"))
             .log(LoggingLevel.INFO, "country-get", "# body before transform is: ${body}")
             .id("log-country-get")
+
+            .process(exchange -> {
+                // Baggage is available via the OpenTelemetry API
+                String val = Baggage.current().getEntryValue("myValue");
+                log.info("Baggage value: {}", val);
+            })
+            .to("log:info")
+
             .process(exchange -> {
                 Object body = exchange.getMessage().getBody();
                 log.info("Received GetCountryRequestV2 request: {}", body);

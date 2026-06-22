@@ -18,7 +18,7 @@
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
-traceparent: 00-{{traceId}}-{{spanId}}-01
+traceparent: 00-{{traceId}}-{{spanId}}-03
 baggage: testBaggage=hallo
 
 < ./getCountryRequest.xml
