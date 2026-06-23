@@ -5,9 +5,7 @@ import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
 import io.opentelemetry.api.baggage.Baggage;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +29,10 @@ public class CountryCamelRoute extends RouteBuilder {
             .routeId("soap-get-country-v3-camel")
             .log(LoggingLevel.INFO, "country-get", "# V3 (Camel) SOAP request received")
             .unmarshal()
-            .jaxb("dein.jaxb.package") // XML -> GetCountryRequest
+            .jaxb("ch.dboeckli.soap.service.producingwebservice.schema")
             .to(DIRECT_GET_COUNTRY)
             .marshal()
-            .jaxb("dein.jaxb.package");
+            .jaxb("ch.dboeckli.soap.service.producingwebservice.schema");
 
         from(DIRECT_GET_COUNTRY).routeId(DIRECT_GET_COUNTRY)
             .setProperty("CamelBaggage_myValue", constant("1234"))
