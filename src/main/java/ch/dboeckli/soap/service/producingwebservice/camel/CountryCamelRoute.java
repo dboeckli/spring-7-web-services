@@ -2,7 +2,9 @@ package ch.dboeckli.soap.service.producingwebservice.camel;
 
 import ch.dboeckli.soap.service.producingwebservice.CountryRepository;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
+import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV3;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
+import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV3;
 import io.opentelemetry.api.baggage.Baggage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.LoggingLevel;
@@ -51,6 +53,12 @@ public class CountryCamelRoute extends RouteBuilder {
                 log.info("Received GetCountryRequestV2 request: {}", body);
                 if (body instanceof GetCountryRequestV2 request) {
                     GetCountryResponseV2 response = new GetCountryResponseV2();
+                    response.setCountry(countryRepository.findCountry(request.getName()));
+                    exchange.getMessage().setBody(response);
+                    return;
+                }
+                else if (body instanceof GetCountryRequestV3 request) {
+                    GetCountryResponseV3 response = new GetCountryResponseV3();
                     response.setCountry(countryRepository.findCountry(request.getName()));
                     exchange.getMessage().setBody(response);
                     return;

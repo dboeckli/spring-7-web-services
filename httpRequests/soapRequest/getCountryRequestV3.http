@@ -1,4 +1,4 @@
-### SOAP Request for getCountryRequest. use camel soap endpoint
+### SOAP Request for getCountryRequest. use soap camel endpoint webservice
 < {%
     function randomHex(length) {
         let result = '';
@@ -15,18 +15,10 @@
     request.variables.set("traceId", traceId);
     request.variables.set("spanId", spanId);
 %}
-POST http://localhost:{{application-port}}/camel-services
+POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
 traceparent: 00-{{traceId}}-{{spanId}}-03
 baggage: testBaggage=hallo
 
-< ./getCountryRequestV2.xml
-
-### without traceparent
-POST http://localhost:{{application-port}}/camel-services
-Content-Type: text/xml; charset=utf-8
-SOAPAction: ""
-baggage: testBaggage=hallo
-
-< ./getCountryRequestV2.xml
+< ./getCountryRequestV3.xml

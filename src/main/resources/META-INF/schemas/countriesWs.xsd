@@ -33,6 +33,23 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="getCountryRequestV3">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getCountryResponseV3">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="country" type="tns:country"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+
     <xs:complexType name="country">
         <xs:sequence>
             <xs:element name="name" type="xs:string"/>
