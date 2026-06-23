@@ -1,9 +1,6 @@
 package ch.dboeckli.soap.service.producingwebservice.soap;
 
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
+import ch.dboeckli.soap.service.producingwebservice.schema.*;
 import ch.dboeckli.soap.service.producingwebservice.common.config.OpenTelemetryTestConfiguration;
 import ch.dboeckli.soap.service.producingwebservice.soap.config.WebServiceTemplateConfiguration;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +47,17 @@ class CountrySoapEndpointIT {
         request.setName("Spain");
 
         GetCountryResponseV2 response = (GetCountryResponseV2) template
+            .marshalSendAndReceive("http://localhost:%d/services".formatted(port), request);
+        assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
+    }
+
+    @Test
+    public void testV3SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
+        WebServiceTemplate template = builder.build();
+        GetCountryRequestV3 request = new GetCountryRequestV3();
+        request.setName("Spain");
+
+        GetCountryResponseV3 response = (GetCountryResponseV3) template
             .marshalSendAndReceive("http://localhost:%d/services".formatted(port), request);
         assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
     }
