@@ -1,4 +1,4 @@
-### SOAP Request for getCountryRequest
+### SOAP Request for getCountryRequest via webservice without camel
 < {%
     function randomHex(length) {
         let result = '';
