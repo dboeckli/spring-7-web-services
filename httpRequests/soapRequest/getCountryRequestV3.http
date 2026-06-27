@@ -22,3 +22,12 @@ traceparent: 00-{{traceId}}-{{spanId}}-03
 baggage: testBaggage=hallo
 
 < ./getCountryRequestV3.xml
+
+
+### without traceparent
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+baggage: testBaggage=hallo
+
+< ./getCountryRequestV3.xml

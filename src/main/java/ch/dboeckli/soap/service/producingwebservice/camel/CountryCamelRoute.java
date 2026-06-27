@@ -6,6 +6,7 @@ import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV3;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV3;
 import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -25,6 +26,17 @@ public class CountryCamelRoute extends RouteBuilder {
 
     @Override
     public void configure() {
+        interceptFrom("spring-ws:*").process(exchange -> {
+            Span currentSpan = Span.current();
+            if (currentSpan != null && currentSpan.isRecording()) {
+                String uri = exchange.getFromEndpoint().getEndpointUri();
+                String qname = uri.replaceAll("spring-ws:rootqname:", "").split("\\?")[0];
+
+                currentSpan.setAttribute("soap.endpoint", uri);
+                currentSpan.setAttribute("soap.qname", qname);
+            }
+        });
+
         // V3 SOAP-Eingang via Camel – technischer Test, nutzt V2-Objekte
         from("spring-ws:rootqname:{https://spring.io/guides/gs-producing-web-service}getCountryRequestV3"
                 + "?endpointMapping=#endpointMapping")
