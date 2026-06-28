@@ -1,4 +1,4 @@
-### SOAP Request for getCountryRequest. use soap webservice and use camel route
+### SOAP V2 - Spring-WS @Endpoint (CountrySoapEndpointV2), delegates via ProducerTemplate to Camel route (direct:get-country)
 < {%
     function randomHex(length) {
         let result = '';
@@ -23,7 +23,7 @@ baggage: testBaggage=hallo
 
 < ./getCountryRequestV2.xml
 
-### without traceparent
+### SOAP V2 - without traceparent
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""

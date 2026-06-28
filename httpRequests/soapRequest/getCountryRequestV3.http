@@ -1,4 +1,4 @@
-### SOAP Request for getCountryRequest. use soap camel endpoint webservice
+### SOAP V3 - Apache Camel spring-ws: entry point, routes directly into Camel route (direct:get-country) — no Spring-WS @Endpoint
 < {%
     function randomHex(length) {
         let result = '';
@@ -24,7 +24,7 @@ baggage: testBaggage=hallo
 < ./getCountryRequestV3.xml
 
 
-### without traceparent
+### SOAP V3 - without traceparent
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""

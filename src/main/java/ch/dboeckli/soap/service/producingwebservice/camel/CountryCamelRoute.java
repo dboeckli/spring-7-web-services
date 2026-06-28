@@ -29,10 +29,11 @@ public class CountryCamelRoute extends RouteBuilder {
         interceptFrom("spring-ws:*").process(exchange -> {
             Span currentSpan = Span.current();
             if (currentSpan != null && currentSpan.isRecording()) {
-                String uri = exchange.getFromEndpoint().getEndpointUri();
-                String qname = uri.replaceAll("spring-ws:rootqname:", "").split("\\?")[0];
+                String endpointUri = exchange.getFromEndpoint().getEndpointUri();
+                String endpointBaseUri = exchange.getFromEndpoint().getEndpointBaseUri();
+                String qname = endpointUri.replaceAll("spring-ws:rootqname:", "").split("\\?")[0];
 
-                currentSpan.setAttribute("soap.endpoint", uri);
+                currentSpan.setAttribute("soap.endpoint", endpointUri);
                 currentSpan.setAttribute("soap.qname", qname);
             }
         });
@@ -62,7 +63,7 @@ public class CountryCamelRoute extends RouteBuilder {
 
             .process(exchange -> {
                 Object body = exchange.getMessage().getBody();
-                log.info("Received GetCountryRequestV2 request: {}", body);
+                log.info("Received GetCountryRequest request: {}", body);
                 if (body instanceof GetCountryRequestV2 request) {
                     GetCountryResponseV2 response = new GetCountryResponseV2();
                     response.setCountry(countryRepository.findCountry(request.getName()));
