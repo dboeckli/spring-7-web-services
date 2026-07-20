@@ -1,4 +1,4 @@
-### SOAP Request for getCountryRequest
+### SOAP V1 - Spring-WS @Endpoint (CountrySoapEndpoint), direct to CountryRepository — no Camel involved
 < {%
     function randomHex(length) {
         let result = '';
@@ -18,12 +18,12 @@
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
-traceparent: 00-{{traceId}}-{{spanId}}-01
+traceparent: 00-{{traceId}}-{{spanId}}-03
 baggage: testBaggage=hallo
 
 < ./getCountryRequest.xml
 
-### SOAP Request for getCountryRequest without traceparent
+### SOAP V1 - without traceparent
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""

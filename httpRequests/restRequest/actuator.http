@@ -18,6 +18,10 @@ Accept: application/json
 GET http://localhost:{{application-port}}/actuator/health/liveness
 Accept: application/json
 
+### actuator httpexchanges
+GET http://localhost:{{application-port}}/actuator/httpexchanges
+Accept: application/json
+
 ### actuator sbom
 GET http://localhost:{{application-port}}/actuator/sbom
 Accept: application/json

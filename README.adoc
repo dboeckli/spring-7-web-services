@@ -17,7 +17,71 @@ This project is based on the guide from https://github.com/spring-guides/gs-prod
 You will build a server that exposes data from various European countries by using a
 WSDL-based SOAP web service.
 
-NOTE: To simplify the example, you will use hardcoded data for the United Kingdom, Spain, and Poland.
+NOTE: To simplify the example, you will use hardcoded data for the United Kingdom, Spain, and Poland
+
+== Architecture Overview
+
+The project exposes three SOAP interface versions and one REST interface, each with a different integration approach:
+
+[cols="1,2,3", options="header"]
+|===
+| Version | Entry Point | Flow
+
+| *V1* (SOAP)
+| Spring-WS `@Endpoint` (`CountrySoapEndpoint`)
+| SOAP Client → Spring-WS Endpoint → `CountryRepository` (Business Logic)
+
+| *V2* (SOAP)
+| Spring-WS `@Endpoint` (`CountrySoapEndpointV2`)
+| SOAP Client → Spring-WS Endpoint → Apache Camel (`direct:get-country`) → `CountryRepository` (Business Logic)
+
+| *V3* (SOAP)
+| Apache Camel `spring-ws:` component
+| SOAP Client → Camel Route (`spring-ws:rootqname:getCountryRequestV3`) → Apache Camel (`direct:get-country`) → `CountryRepository` (Business Logic)
+
+| *REST*
+| Spring MVC `@RestController` (`CountryRestController`)
+| HTTP Client → `GET /api/countries/{name}` → `CountryRepository` (Business Logic)
+|===
+
+Key observations:
+
+* *V1* uses Spring-WS directly and accesses the repository without any middleware.
+* *V2* uses Spring-WS as the entry point but delegates processing to a shared Apache Camel route (`direct:get-country`) via a `ProducerTemplate`. This allows reuse of the Camel-based processing pipeline.
+* *V3* uses Apache Camel's `spring-ws` component as the entry point, so the entire request handling — including SOAP message reception — is managed by Camel. It routes into the same shared `direct:get-country` route as V2.
+* The shared Camel route (`direct:get-country`) handles JAXB marshalling/unmarshalling and OpenTelemetry baggage propagation for both V2 and V3.
+* The *REST* interface bypasses both Spring-WS and Camel entirely, accessing the repository directly like V1.
+
+.Interface Architecture
+....
+      SOAP Clients                                         HTTP Client
+           │                                                    │
+    ┌──────┼──────────────────────────┐                         │
+    │ V1   │ V2                       │ V3                      │
+    ▼      ▼                          ▼                         ▼
+┌─────────────┐ ┌─────────────┐ ┌───────────────┐ ┌──────────────────────┐
+│  Spring-WS  │ │  Spring-WS  │ │ Apache Camel  │ │     Spring MVC       │
+│  @Endpoint  │ │  @Endpoint  │ │ spring-ws:    │ │   @RestController    │
+│    (V1)     │ │    (V2)     │ │ rootqname(V3) │ │ /api/countries/{n}   │
+└──────┬──────┘ └──────┬──────┘ └──────┬────────┘ └──────────┬───────────┘
+       │ direct         │ via           │            direct    │
+       │                │ ProducerTpl   │                      │
+       │                └──────┬────────┘                      │
+       │                       │                               │
+       │          ┌────────────▼──────────────┐                │
+       │          │     Apache Camel Route    │                │
+       │          │     direct:get-country    │                │
+       │          │  (JAXB marshal + OTel)    │                │
+       │          └────────────┬──────────────┘                │
+       │                       │                               │
+       └───────────────────────┤    ┌──────────────────────────┘
+                               ▼    ▼
+                      ┌─────────────────────┐
+                      │  CountryRepository  │
+                      │  (Business Logic)   │
+                      └─────────────────────┘
+....
+
 
 == SOAP Message Structure
 
@@ -127,6 +191,62 @@ which the generated WSDL file is available. In this case, the WSDL will be avail
 By default, they will be exposed on the `"/services"` HTTP endpoint, but this can be customized
 with the `spring.webservices.path` property.
 
+== Camel Spring Boot Compatibility Matrix
+
+The script `.run/scripts/camel-springboot-matrix.sh` generates an AsciiDoc compatibility matrix
+for Apache Camel Spring Boot and Spring Boot versions, including Apache CXF versions and release dates.
+
+=== Usage
+
+[source,bash]
+----
+# All versions
+bash .run/scripts/camel-springboot-matrix.sh
+
+# With version range (min max)
+bash .run/scripts/camel-springboot-matrix.sh 4.0.0 4.15.0
+----
+
+The script writes the result to `camel-springboot-matrix.adoc` in the current directory.
+
+=== What it generates
+
+[cols="1,3", options="header"]
+|===
+| Column | Description
+
+| Camel Version
+| The Camel Spring Boot release version
+
+| Type
+| Release type from camel.apache.org/releases (PATCH / MINOR / MAJOR / LTS)
+
+| Camel Release Date
+| Date from Maven Central directory listing
+
+| Spring Boot Version
+| Compatible Spring Boot version read from the Camel POM
+
+| Spring Boot Release Date
+| Date from Maven Central directory listing
+
+| CXF Version
+| Apache CXF version from `camel-parent` POM (`<cxf-version>`)
+
+| CXF POM URL / Spring Boot POM URL
+| Direct links to the source POM files on Maven Central
+|===
+
+=== POM sources
+
+* Versions *< 4.15.0*: Spring Boot version from `camel-spring-boot` BOM; CXF version fetched additionally from `camel-parent`.
+* Versions *>= 4.15.0*: Both Spring Boot and CXF version from `camel-parent` POM (single fetch).
+
+[source,bash]
+----
+include::.run/scripts/camel-springboot-matrix.sh[]
+----
+
 == OpenTelemetry Resources
 
 Useful links for OpenTelemetry integration with Spring Boot:
@@ -136,13 +256,47 @@ Useful links for OpenTelemetry integration with Spring Boot:
 
 == Test the Application
 
-use the http request file under:
+All HTTP request files are located under `httpRequests/`. Each file contains two variants: one with a `traceparent` header (for distributed tracing) and one without.
+
+=== SOAP V1 — Spring-WS @Endpoint, direct to repository
+
+`httpRequests/soapRequest/getCountryRequest.http`
+
 [source,httprequest]
 ----
 include::httpRequests/soapRequest/getCountryRequest.http[]
 ----
 
-As a result, you should see the following response:
+=== SOAP V2 — Spring-WS @Endpoint, via Camel route
+
+`httpRequests/soapRequest/getCountryRequestV2.http`
+
+[source,httprequest]
+----
+include::httpRequests/soapRequest/getCountryRequestV2.http[]
+----
+
+=== SOAP V3 — Camel spring-ws: entry point, via Camel route
+
+`httpRequests/soapRequest/getCountryRequestV3.http`
+
+[source,httprequest]
+----
+include::httpRequests/soapRequest/getCountryRequestV3.http[]
+----
+
+=== REST — Spring MVC @RestController, direct to repository
+
+`httpRequests/restRequest/getCountryRequest.http`
+
+[source,httprequest]
+----
+include::httpRequests/restRequest/getCountryRequest.http[]
+----
+
+=== Example SOAP Response
+
+All SOAP endpoints return a response in the following format:
 
 [source,xml]
 ----

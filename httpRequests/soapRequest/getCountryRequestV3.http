@@ -1,4 +1,4 @@
-### SOAP V2 - Spring-WS @Endpoint (CountrySoapEndpointV2), delegates via ProducerTemplate to Camel route (direct:get-country)
+### SOAP V3 - Apache Camel spring-ws: entry point, routes directly into Camel route (direct:get-country) — no Spring-WS @Endpoint
 < {%
     function randomHex(length) {
         let result = '';
@@ -21,12 +21,13 @@ SOAPAction: ""
 traceparent: 00-{{traceId}}-{{spanId}}-03
 baggage: testBaggage=hallo
 
-< ./getCountryRequestV2.xml
+< ./getCountryRequestV3.xml
 
-### SOAP V2 - without traceparent
+
+### SOAP V3 - without traceparent
 POST http://localhost:{{application-port}}/services
 Content-Type: text/xml; charset=utf-8
 SOAPAction: ""
 baggage: testBaggage=hallo
 
-< ./getCountryRequestV2.xml
+< ./getCountryRequestV3.xml

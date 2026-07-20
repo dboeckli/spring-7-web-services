@@ -1,9 +1,6 @@
 package ch.dboeckli.soap.service.producingwebservice.soap;
 
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
-import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
+import ch.dboeckli.soap.service.producingwebservice.schema.*;
 import ch.dboeckli.soap.service.producingwebservice.common.config.OpenTelemetryTestConfiguration;
 import ch.dboeckli.soap.service.producingwebservice.soap.config.WebServiceTemplateConfiguration;
 import io.opentelemetry.api.common.AttributeKey;
@@ -115,6 +112,36 @@ class CountrySoapEndpointWithOtelIT {
                         + spans.stream().map(SpanData::getName).toList()));
 
             assertThat(soapSpan.getAttributes().get(AttributeKey.stringKey("soap.method"))).isNotNull();
+            assertThat(soapSpan.getAttributes().get(AttributeKey.stringKey("soap.endpoint"))).isNotNull();
+        });
+    }
+
+    @Test
+    void testV3SendAndReceiveWithSpan(@Autowired WebServiceTemplateBuilder builder) {
+        WebServiceTemplate template = builder.build();
+        GetCountryRequestV3 request = new GetCountryRequestV3();
+        request.setName("Spain");
+
+        GetCountryResponseV3 response = (GetCountryResponseV3) template
+            .marshalSendAndReceive("http://localhost:%d/services".formatted(port), request);
+        assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
+
+        // Warten bis Spans exportiert wurden
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+            List<SpanData> spans = spanExporter.getFinishedSpanItems();
+            log.info("Collected {} spans:", spans.size());
+            spans.forEach(span -> log.info("  Span: name='{}', attributes={}", span.getName(), span.getAttributes()));
+
+            assertThat(spans).isNotEmpty();
+
+            // Span mit soap.endpoint finden
+            SpanData soapSpan = spans.stream()
+                .filter(s -> s.getAttributes().get(AttributeKey.stringKey("soap.endpoint")) != null)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No span with soap.endpoint found. Available spans: "
+                        + spans.stream().map(SpanData::getName).toList()));
+
+            assertThat(soapSpan.getAttributes().get(AttributeKey.stringKey("soap.qname"))).isNotNull();
             assertThat(soapSpan.getAttributes().get(AttributeKey.stringKey("soap.endpoint"))).isNotNull();
         });
     }
