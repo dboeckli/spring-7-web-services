@@ -17,7 +17,7 @@ This project is based on the guide from https://github.com/spring-guides/gs-prod
 You will build a server that exposes data from various European countries by using a
 WSDL-based SOAP web service.
 
-NOTE: To simplify the example, you will use hardcoded data for the United Kingdom, Spain, and Poland.
+NOTE: To simplify the example, you will use hardcoded data for the United Kingdom, Spain, and Poland
 
 == Architecture Overview
 
