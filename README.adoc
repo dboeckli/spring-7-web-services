@@ -87,7 +87,31 @@ Key observations:
 
 A SOAP message comprises 4 elements:
 
-image::image-2026-04-11-13-52-29-340.png[]
+....
++------------------------------------------------------------------+
+| <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/">    |
+|                                                                  |
+|  +------------------------------------------------------------+  |
+|  | SOAP Header                                                |  |
+|  |                                                            |  |
+|  |  <soap:Header>                                             |  |
+|  |    Optional header parts                                   |  |
+|  |  </soap:Header>                                            |  |
+|  |                                                            |  |
+|  +------------------------------------------------------------+  |
+|                                                                  |
+|  +------------------------------------------------------------+  |
+|  | SOAP Body                                                  |  |
+|  |                                                            |  |
+|  |  <soap:Body>                                               |  |
+|  |    SOAP Message Payload                                    |  |
+|  |    Optional SOAP Faults                                    |  |
+|  |  </soap:Body>                                              |  |
+|  |                                                            |  |
+|  +------------------------------------------------------------+  |
+|                                                                  |
++------------------------------------------------------------------+
+....
 
 Key characteristics of SOAP messages in this web service:
 
@@ -190,52 +214,6 @@ which the generated WSDL file is available. In this case, the WSDL will be avail
 
 By default, they will be exposed on the `"/services"` HTTP endpoint, but this can be customized
 with the `spring.webservices.path` property.
-
-== Camel Spring Boot Compatibility Matrix
-
-The script `.run/scripts/camel-springboot-matrix.sh` generates an AsciiDoc compatibility matrix
-for Apache Camel Spring Boot and Spring Boot versions, including Apache CXF versions and release dates.
-
-=== Usage
-
-[source,bash]
-----
-# All versions
-bash .run/scripts/camel-springboot-matrix.sh
-
-# With version range (min max)
-bash .run/scripts/camel-springboot-matrix.sh 4.0.0 4.15.0
-----
-
-The script writes the result to `camel-springboot-matrix.adoc` in the current directory.
-
-=== What it generates
-
-[cols="1,3", options="header"]
-|===
-| Column | Description
-
-| Camel Version
-| The Camel Spring Boot release version
-
-| Type
-| Release type from camel.apache.org/releases (PATCH / MINOR / MAJOR / LTS)
-
-| Camel Release Date
-| Date from Maven Central directory listing
-
-| Spring Boot Version
-| Compatible Spring Boot version read from the Camel POM
-
-| Spring Boot Release Date
-| Date from Maven Central directory listing
-
-| CXF Version
-| Apache CXF version from `camel-parent` POM (`<cxf-version>`)
-
-| CXF POM URL / Spring Boot POM URL
-| Direct links to the source POM files on Maven Central
-|===
 
 === POM sources
 
