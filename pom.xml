@@ -353,6 +353,8 @@
               <include>**/*.md</include>
             </includes>
             <excludes>
+              <exclude>.claude/**</exclude>
+              <exclude>CLAUDE.md</exclude>
               <exclude>target/**</exclude>
               <exclude>**/node_modules/**</exclude>
             </excludes>
