@@ -354,6 +354,7 @@
             </includes>
             <excludes>
               <exclude>.claude/**</exclude>
+              <exclude>AGENTS.md</exclude>
               <exclude>CLAUDE.md</exclude>
               <exclude>target/**</exclude>
               <exclude>**/node_modules/**</exclude>
@@ -389,7 +390,7 @@
               <exclude>**/node_modules/**</exclude>
             </excludes>
             <shfmt>
-              <version>3.13.0</version>
+              <version>3.13.1</version>
             </shfmt>
           </shell>
         </configuration>
