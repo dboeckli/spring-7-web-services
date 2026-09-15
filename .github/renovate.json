@@ -140,7 +140,7 @@
             "extractVersionTemplate": "^v?(?<version>.*)$",
             "managerFilePatterns": [
                 "/(^|\\/)pom\\.xml$/",
-                "/^\\.github\\/workflows\\/(maven-build|release)\\.ya?ml$/"
+                "/^\\.github\\/workflows\\/.*\\.ya?ml$/"
             ],
             "matchStrings": [
                 "<shfmt>\\s*<version>(?<currentValue>\\d+\\.\\d+\\.\\d+)</version>",
