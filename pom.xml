@@ -54,7 +54,7 @@
     <helm.executable>helm</helm.executable>
 
     <libre-wsdl4j.version>1.13.0</libre-wsdl4j.version>
-    <camel-spring-boot.version>4.22.0</camel-spring-boot.version>
+    <camel-spring-boot.version>4.22.1</camel-spring-boot.version>
 
     <logstash-logback.version>9.0</logstash-logback.version>
     <logback-ecs-encoder.version>1.8.0</logback-ecs-encoder.version>
