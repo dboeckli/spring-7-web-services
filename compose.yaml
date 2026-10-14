@@ -1,7 +1,7 @@
 ---
 services:
   otel-collector:
-    image: "otel/opentelemetry-collector-contrib:0.161.0"
+    image: "otel/opentelemetry-collector-contrib:0.162.0"
     container_name: "otel-collector"
     command:
     - "--config=/etc/otel-collector-config.yaml"
@@ -14,7 +14,7 @@ services:
     - "monitoring"
     restart: "unless-stopped"
   jaeger:
-    image: "cr.jaegertracing.io/jaegertracing/jaeger:2.21.0"
+    image: "cr.jaegertracing.io/jaegertracing/jaeger:2.22.0"
     container_name: "jaeger"
     ports:
     - "16686:16686"
