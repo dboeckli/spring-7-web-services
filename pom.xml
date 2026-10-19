@@ -70,7 +70,7 @@
     <jaxb2-maven-plugin.version>4.2.0</jaxb2-maven-plugin.version>
 
     <!-- Testing -->
-    <logcaptor.version>2.12.7</logcaptor.version>
+    <logcaptor.version>2.13.0</logcaptor.version>
 
     <!-- Sonar -->
     <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
