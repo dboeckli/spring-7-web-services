@@ -1,5 +1,5 @@
-### Flow: REST country lookup (Spring MVC) — see restRequest/country-flow/country-flow.md
-### Run in order: step 5 depends on the traceId set by step 2.
+# Flow: REST country lookup (Spring MVC) — see restRequest/country-flow/country-flow.md
+# Run in order: step 5 depends on the traceId set by step 2.
 
 ### 1) actuator health (precondition)
 GET http://localhost:{{application-port}}/actuator/health
