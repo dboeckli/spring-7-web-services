@@ -112,8 +112,16 @@ management:
         otlp:
           endpoint: "http://localhost:4318/v1/traces"
 
+appconfig:
+  request-logging:
+    # set to false to remove the request logging filter from the chain entirely
+    enabled: true
+    # request URI prefixes that are not logged
+    exclude-paths:
+      - /actuator/health
+
 logging:
   level:
-    org.springframework.web.filter.CommonsRequestLoggingFilter: "DEBUG"
+    ch.dboeckli.soap.service.log.RequestLoggingFilter: "DEBUG"
     io.micrometer.tracing: DEBUG
     io.opentelemetry: DEBUG

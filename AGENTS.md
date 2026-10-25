@@ -36,7 +36,7 @@ Key design decisions:
 | `camel` | `CountryCamelRoute` (V3 entry + `direct:get-country`), `SoapEndpointConfig` (beans for V3) |
 | `rest` | `CountryRestController` (`GET /api/countries/{name}`) |
 | `tracing` | 4 filter classes (`BaggageTagging`, `PayloadLogging`, `TraceDebug`, `TraceParent`) |
-| `log` | `RequestLoggingConfig`, `ConfigChangeListener`, `LogMessage` |
+| `log` | `RequestLoggingConfig`, `RequestLoggingFilter` (request logging) |
 | root | `CountryRepository`, `SpringSoapServiceApplication` |
 
 ## Build & test commands
