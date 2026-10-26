@@ -4,9 +4,10 @@ Die IntelliJ-HTTP-Requests unter `httpRequests/` bleiben der Master (Source of T
 Bruno-Collection wird daraus als **OpenCollection YAML** generiert und dient als Alternative zum
 IntelliJ HTTP Client sowie zur Automatisierung per CLI.
 
-Aktueller Stand: nur der REST-Flow (`restRequest/country-flow`). SOAP folgt später — Bruno kennt
-keine Datei-Referenzen im Body (`< ../getCountryRequest.xml`), dafür ist noch eine eigene
-Body-Strategie nötig.
+Aktueller Stand: REST-Flow (`restRequest/country-flow`) und SOAP-Flow
+(`soapRequest/country-versions-flow`). SOAP-Bodies werden beim Generieren aus den externen
+XML-Dateien (`< ../getCountryRequest*.xml`) **inline** in die Bruno-Requests übernommen, weil
+Bruno keine Datei-Referenzen im Body kennt.
 
 ## Struktur
 
@@ -18,6 +19,8 @@ httpRequests/bruno/
 │   └── k8s.yml                 # application-port 30080
 ├── restRequest/
 │   └── country-flow/           # 6 Schritte aus country-flow.http
+├── soapRequest/
+│   └── country-versions-flow/  # 8 Schritte aus country-versions-flow.http
 └── tools/
     ├── http-to-bru.mjs         # Generator .http -> .yml
     ├── package.json            # @usebruno/filestore
@@ -25,7 +28,9 @@ httpRequests/bruno/
 ```
 
 Jeder `.http`-Block wird zu einer `.yml`-Datei; Ordner und Reihenfolge (`seq`) entsprechen dem
-Master. Flow-Dateien landen im gleichnamigen Ordner.
+Master. Flow-Dateien landen im gleichnamigen Ordner. `< datei.xml` im Body wird als
+Datei-Include erkannt und der Inhalt beim Generieren inline eingebettet; `< script.js` bleibt ein
+Script-Include.
 
 ## Generieren
 
@@ -70,3 +75,9 @@ Der Generator mappt die IntelliJ-Scripting-API auf Bruno:
 
 Verschachtelte Objekte wie `exchange.response.status` werden bewusst **nicht** ersetzt
 (Lookbehind im Generator), da sie normale JS-Objekte aus dem Response-Body sind.
+
+## Alternative: WSDL-Import
+
+`httpRequests/bruno-wsdl/` enthält eine zweite, unabhängige Collection, die per
+`bru import wsdl` aus den generierten WSDLs erzeugt wurde — als Vergleich zur `.http`-Ableitung.
+Details und Einschränkungen: `httpRequests/bruno-wsdl/README.md`.

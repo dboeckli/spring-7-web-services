@@ -1,0 +1,23 @@
+info:
+  name: getCountry
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:{{application-port}}/services
+  headers:
+    - name: Content-Type
+      value: text/xml; charset=utf-8
+    - name: SOAPAction
+      value: ""
+  body:
+    type: xml
+    data: <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><getCountryRequest><name>string</name></getCountryRequest></soap:Body></soap:Envelope>
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

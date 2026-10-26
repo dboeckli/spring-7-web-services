@@ -599,6 +599,14 @@ async function buildExpected(files, collectionRoot, source, format) {
       for (const include of request.includes) {
         includeContents[include] = await readIncludeCached(include, file);
       }
+      while (request.body.length > 0 && request.body[request.body.length - 1].trim() === '') {
+        request.body.pop();
+      }
+      const bodyInclude = request.body.length === 1 ? request.body[0].trim().match(/^<\s+(\S+)$/) : null;
+      if (bodyInclude) {
+        const bodyPath = path.resolve(path.dirname(file), bodyInclude[1]);
+        request.body = (await readFile(bodyPath, 'utf8')).replace(/\r\n/g, '\n').split('\n');
+      }
       const renderedBru = renderRequest(request, sequence, {
         preamble: index === 0 ? preamble : [],
         sourceRelativePath: relative,

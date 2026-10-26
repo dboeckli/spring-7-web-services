@@ -1,0 +1,12 @@
+opencollection: 1.0.0
+
+info:
+  name: spring-7-web-services httpRequests (WSDL import)
+  version: "1"
+
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

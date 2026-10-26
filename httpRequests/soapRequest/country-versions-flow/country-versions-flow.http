@@ -1,6 +1,6 @@
-### Flow: SOAP country lookup across V1 / V2 / V3 — see soapRequest/country-versions-flow/country-versions-flow.md
-### Run in order: steps 4 and 6 reuse the traceId from step 2, step 8 verifies all three variants.
-### Bodies are kept as external XML files (../getCountryRequest*.xml) - one source of truth per version.
+# Flow: SOAP country lookup across V1 / V2 / V3 — see soapRequest/country-versions-flow/country-versions-flow.md
+# Run in order: steps 4 and 6 reuse the traceId from step 2, step 8 verifies all three variants.
+# Bodies are kept as external XML files (../getCountryRequest*.xml) - one source of truth per version.
 
 ### 1) actuator health (precondition)
 GET http://localhost:{{application-port}}/actuator/health
