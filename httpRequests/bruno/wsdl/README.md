@@ -34,8 +34,8 @@ bru run wsdl -r --env local
 ```
 
 Die Requests sind bewusst **minimal**: Beispiel-Body mit `<name>string</name>`, keine
-`traceparent`/`baggage`-Header, keine Tests. Für echte Countries (`Spain`, `Poland`,
-`United Kingdom`) den `name` anpassen; für Trace-Prüfungen und Asserts den `.http`-Flow
+`traceparent`/`baggage`-Header, nur ein generierter `200`-Check. Für echte Countries (`Spain`,
+`Poland`, `United Kingdom`) den `name` anpassen; für Trace-Prüfungen und Asserts den `.http`-Flow
 (`soapRequest/country-versions-flow`) bzw. dessen Bruno-Ableitung verwenden.
 
 ## WSDL-Snapshots aktualisieren

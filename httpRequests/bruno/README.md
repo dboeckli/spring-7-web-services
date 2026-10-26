@@ -82,5 +82,5 @@ Verschachtelte Objekte wie `exchange.response.status` werden bewusst **nicht** e
 
 Die generierten WSDLs (V1/V2/V3) und die daraus per `bru import wsdl` erzeugten Requests liegen
 unter `wsdl/` (Wrapper: `tools/import-wsdl.mjs`, korrigiert URL und Target-Namespace). Diese
-Requests sind nur ein Gerüst (Beispiel-Body, keine Trace-Header, keine Tests/Flows); der Master
+Requests sind nur ein Gerüst (Beispiel-Body, keine Trace-Header, nur 200-Check); der Master
 für Flows bleibt die `.http`-Ableitung. Details: `wsdl/README.md`.

@@ -15,6 +15,14 @@ http:
     type: xml
     data: <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><getCountryRequest xmlns="https://spring.io/guides/gs-producing-web-service"><name>string</name></getCountryRequest></soap:Body></soap:Envelope>
 
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("returns 200", function () {
+            expect(res.status === 200, "expected 200 but got " + res.status).to.be.true;
+        });
+
 settings:
   encodeUrl: true
   timeout: 0

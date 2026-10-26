@@ -39,8 +39,18 @@ async function collectYmlFiles(directory) {
   return result;
 }
 
+const STATUS_TEST = `runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("returns 200", function () {
+            expect(res.status === 200, "expected 200 but got " + res.status).to.be.true;
+        });
+
+`;
+
 function rewriteRequest(content, targetNamespace) {
-  return content
+  const rewritten = content
     .split('\n')
     .map((line) => {
       if (/^\s+url: \/services\s*$/.test(line)) {
@@ -53,6 +63,7 @@ function rewriteRequest(content, targetNamespace) {
       return line;
     })
     .join('\n');
+  return rewritten.includes('type: tests') ? rewritten : rewritten.replace('\nsettings:', `\n${STATUS_TEST}settings:`);
 }
 
 async function main() {
