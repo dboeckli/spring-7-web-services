@@ -58,6 +58,8 @@
 
     <logstash-logback.version>9.0</logstash-logback.version>
     <logback-ecs-encoder.version>1.8.0</logback-ecs-encoder.version>
+    <!-- 2.28.1-alpha depends on opentelemetry-api 1.62.0, matching Boot's managed ${opentelemetry.version} -->
+    <opentelemetry-logback-appender.version>2.28.1-alpha</opentelemetry-logback-appender.version>
 
     <!-- plugins -->
     <spring-javaformat-maven-plugin.version>0.0.48</spring-javaformat-maven-plugin.version>
@@ -175,6 +177,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-opentelemetry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+      <version>${opentelemetry-logback-appender.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
