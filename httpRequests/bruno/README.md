@@ -21,8 +21,10 @@ httpRequests/bruno/
 │   └── country-flow/           # 6 Schritte aus country-flow.http
 ├── soapRequest/
 │   └── country-versions-flow/  # 8 Schritte aus country-versions-flow.http
+├── wsdl/                       # Contract-Snapshots V1/V2/V3 + generierte Requests
 └── tools/
     ├── http-to-bru.mjs         # Generator .http -> .yml
+    ├── import-wsdl.mjs         # bru import wsdl + URL/xmlns-Fix
     ├── package.json            # @usebruno/filestore
     └── package-lock.json
 ```
@@ -76,8 +78,9 @@ Der Generator mappt die IntelliJ-Scripting-API auf Bruno:
 Verschachtelte Objekte wie `exchange.response.status` werden bewusst **nicht** ersetzt
 (Lookbehind im Generator), da sie normale JS-Objekte aus dem Response-Body sind.
 
-## Alternative: WSDL-Import
+## WSDL-Contract
 
-`httpRequests/bruno-wsdl/` enthält eine zweite, unabhängige Collection, die per
-`bru import wsdl` aus den generierten WSDLs erzeugt wurde — als Vergleich zur `.http`-Ableitung.
-Details und Einschränkungen: `httpRequests/bruno-wsdl/README.md`.
+Die generierten WSDLs (V1/V2/V3) und die daraus per `bru import wsdl` erzeugten Requests liegen
+unter `wsdl/` (Wrapper: `tools/import-wsdl.mjs`, korrigiert URL und Target-Namespace). Diese
+Requests sind nur ein Gerüst (Beispiel-Body, keine Trace-Header, keine Tests/Flows); der Master
+für Flows bleibt die `.http`-Ableitung. Details: `wsdl/README.md`.

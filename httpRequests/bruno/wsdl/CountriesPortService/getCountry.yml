@@ -13,7 +13,7 @@ http:
       value: ""
   body:
     type: xml
-    data: <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><getCountryRequestV3><name>string</name></getCountryRequestV3></soap:Body></soap:Envelope>
+    data: <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><getCountryRequest xmlns="https://spring.io/guides/gs-producing-web-service"><name>string</name></getCountryRequest></soap:Body></soap:Envelope>
 
 settings:
   encodeUrl: true

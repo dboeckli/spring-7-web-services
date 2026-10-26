@@ -1,3 +1,0 @@
-variables:
-  - name: application-port
-    value: "8080"
