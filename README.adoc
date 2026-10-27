@@ -208,6 +208,42 @@ with the `spring.webservices.path` property.
 include::.run/scripts/camel-springboot-matrix.sh[]
 ----
 
+== Observability
+
+Start the local telemetry stack with `docker compose -f compose.yaml up -d`. The application sends
+traces, metrics and logs to the OTel Collector via OTLP (`http://localhost:4317` gRPC,
+`http://localhost:4318` HTTP); the collector fans out to Jaeger, Zipkin, Elasticsearch and the
+Elastic APM Server.
+
+[cols="1,2,3", options="header"]
+|===
+| Tool | URL | Data
+
+| Jaeger
+| http://localhost:16686[Jaeger UI]
+| Traces (OTLP gRPC)
+
+| Zipkin
+| http://localhost:9411[Zipkin UI]
+| Traces (Zipkin export)
+
+| Kibana
+| http://localhost:5601[Kibana]
+| Logs in Elasticsearch (`discover`), plus the APM UI
+
+| Elastic APM
+| http://localhost:5601/app/apm[Kibana APM]
+| Traces and metrics via the APM Server
+
+| Elasticsearch
+| http://localhost:9200[Elasticsearch API]
+| Index/query API (no dedicated UI)
+|===
+
+NOTE: The `local` Spring profile enables OTLP export for traces, metrics and logs
+(`management.opentelemetry.*`); logs carry `trace_id`/`span_id` plus `thread.name`,
+`testBaggage` and `addedBaggage` as attributes.
+
 == OpenTelemetry Resources
 
 Useful links for OpenTelemetry integration with Spring Boot:
