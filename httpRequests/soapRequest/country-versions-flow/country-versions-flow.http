@@ -1,0 +1,214 @@
+# Flow: SOAP country lookup across V1 / V2 / V3 — see soapRequest/country-versions-flow/country-versions-flow.md
+# Run in order: steps 4 and 6 reuse the traceId from step 2, step 8 verifies all three variants.
+# Bodies are kept as external XML files (../getCountryRequest*.xml) - one source of truth per version.
+
+### 1) actuator health (precondition)
+GET http://localhost:{{application-port}}/actuator/health
+Accept: application/json
+
+> {%
+    client.test("health returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("health status is UP", function () {
+        client.assert(response.body.status === "UP", "status=" + response.body.status);
+    });
+%}
+
+### 2) SOAP V1 with an explicit traceparent (Spring-WS @Endpoint, direct to CountryRepository)
+< {%
+    const hex = (length) => Array.from({ length: length },
+        () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+    client.global.set("traceId", hex(32));
+    client.global.set("spanId", hex(16));
+    client.log("starting trace " + client.global.get("traceId"));
+%}
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+traceparent: 00-{{traceId}}-{{spanId}}-01
+baggage: testBaggage=hallo
+
+< ../getCountryRequest.xml
+
+> {%
+    const body = String(response.body);
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V1 response", function () {
+        client.assert(/<([\w-]+:)?getCountryResponse[\s>]/.test(body), "getCountryResponse missing");
+        client.assert(/<([\w-]+:)?name>Spain</.test(body), "name=Spain missing");
+        client.assert(/<([\w-]+:)?capital>Madrid</.test(body), "capital=Madrid missing");
+        client.assert(/<([\w-]+:)?currency>EUR</.test(body), "currency=EUR missing");
+    });
+    client.test("does not overwrite the incoming traceparent", function () {
+        client.assert(!response.headers.valueOf("traceparent"), "unexpected response traceparent");
+    });
+%}
+
+### 3) SOAP V1 without traceparent (server creates a new trace)
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+baggage: testBaggage=hallo
+
+< ../getCountryRequest.xml
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V1 response", function () {
+        client.assert(/<([\w-]+:)?name>Spain</.test(String(response.body)), "name=Spain missing");
+    });
+    client.test("server generates a traceparent response header", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!!traceparent, "traceparent response header missing");
+        client.assert(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/.test(traceparent),
+            "unexpected traceparent: " + traceparent);
+    });
+%}
+
+### 4) SOAP V2 with traceparent (Spring-WS @Endpoint, delegates to Camel direct:get-country)
+< {%
+    if (!client.global.get("traceId")) {
+        throw new Error("traceId is not set - run step 2 first");
+    }
+    const hex = (length) => Array.from({ length: length },
+        () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+    client.global.set("spanId", hex(16));
+%}
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+traceparent: 00-{{traceId}}-{{spanId}}-01
+baggage: testBaggage=hallo
+
+< ../getCountryRequestV2.xml
+
+> {%
+    const body = String(response.body);
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V2 response", function () {
+        client.assert(/<([\w-]+:)?getCountryResponseV2[\s>]/.test(body), "getCountryResponseV2 missing");
+        client.assert(/<([\w-]+:)?name>Spain</.test(body), "name=Spain missing");
+        client.assert(/<([\w-]+:)?capital>Madrid</.test(body), "capital=Madrid missing");
+    });
+    client.test("does not overwrite the incoming traceparent", function () {
+        client.assert(!response.headers.valueOf("traceparent"), "unexpected response traceparent");
+    });
+%}
+
+### 5) SOAP V2 without traceparent (server creates a new trace)
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+baggage: testBaggage=hallo
+
+< ../getCountryRequestV2.xml
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V2 response", function () {
+        client.assert(/<([\w-]+:)?name>Spain</.test(String(response.body)), "name=Spain missing");
+    });
+    client.test("server generates a traceparent response header", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!!traceparent, "traceparent response header missing");
+        client.assert(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/.test(traceparent),
+            "unexpected traceparent: " + traceparent);
+    });
+%}
+
+### 6) SOAP V3 with traceparent (Camel spring-ws: entry point into direct:get-country)
+< {%
+    if (!client.global.get("traceId")) {
+        throw new Error("traceId is not set - run step 2 first");
+    }
+    const hex = (length) => Array.from({ length: length },
+        () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+    client.global.set("spanId", hex(16));
+%}
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+traceparent: 00-{{traceId}}-{{spanId}}-01
+baggage: testBaggage=hallo
+
+< ../getCountryRequestV3.xml
+
+> {%
+    const traceId = client.global.get("traceId");
+    const body = String(response.body);
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V3 response", function () {
+        client.assert(/<([\w-]+:)?getCountryResponseV3[\s>]/.test(body), "getCountryResponseV3 missing");
+        client.assert(/<([\w-]+:)?name>Spain</.test(body), "name=Spain missing");
+        client.assert(/<([\w-]+:)?currency>EUR</.test(body), "currency=EUR missing");
+    });
+    client.test("echoes traceparent and baggage in the SOAP header", function () {
+        client.assert(body.includes('traceparent="00-' + traceId + "-"),
+            "SOAP header traceparent does not carry the incoming traceId");
+        client.assert(body.includes('baggage="'), "SOAP header baggage missing");
+    });
+    client.test("does not overwrite the incoming traceparent", function () {
+        client.assert(!response.headers.valueOf("traceparent"), "unexpected response traceparent");
+    });
+%}
+
+### 7) SOAP V3 without traceparent (server creates a new trace)
+POST http://localhost:{{application-port}}/services
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+baggage: testBaggage=hallo
+
+< ../getCountryRequestV3.xml
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V3 response", function () {
+        client.assert(/<([\w-]+:)?name>Spain</.test(String(response.body)), "name=Spain missing");
+    });
+    client.test("server generates a traceparent response header", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!!traceparent, "traceparent response header missing");
+        client.assert(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/.test(traceparent),
+            "unexpected traceparent: " + traceparent);
+    });
+%}
+
+### 8) verify the recorded V1/V2/V3 exchanges (actuator/httpexchanges) — requires steps 2, 4 and 6
+< {%
+    if (!client.global.get("traceId")) {
+        throw new Error("traceId is not set - run step 2 first");
+    }
+%}
+GET http://localhost:{{application-port}}/actuator/httpexchanges
+Accept: application/json
+
+> {%
+    const traceId = client.global.get("traceId");
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("records one /services exchange per variant for the shared traceId", function () {
+        const matches = (response.body.exchanges || []).filter(function (exchange) {
+            const uri = exchange.request && exchange.request.uri ? exchange.request.uri : "";
+            return uri.includes("/services") && JSON.stringify(exchange.request.headers || {}).includes(traceId);
+        });
+        client.assert(matches.length === 3, "expected 3 exchanges for the traceId but got " + matches.length);
+        matches.forEach(function (exchange) {
+            client.assert(String(exchange.response.status) === "200",
+                "unexpected status " + exchange.response.status);
+        });
+    });
+%}

@@ -66,9 +66,17 @@
         </encoder>
     </appender>
 
+    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <!-- thread.name / thread.id as log attributes -->
+        <captureExperimentalAttributes>true</captureExperimentalAttributes>
+        <!-- baggage correlation fields (see micrometer tracing baggage.correlation) -->
+        <captureMdcAttributes>testBaggage,addedBaggage</captureMdcAttributes>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="JSON_FILE" />
         <appender-ref ref="ECS_FILE"/>
+        <appender-ref ref="OTEL"/>
     </root>
 </configuration>
