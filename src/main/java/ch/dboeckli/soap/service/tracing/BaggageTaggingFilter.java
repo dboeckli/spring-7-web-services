@@ -2,7 +2,6 @@ package ch.dboeckli.soap.service.tracing;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.context.Scope;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ public class BaggageTaggingFilter extends OncePerRequestFilter {
         String traceParent = request.getHeader("traceparent");
         log.info("traceparent: {}", traceParent);
 
-        try (Scope ignored = updatedBaggage.makeCurrent()) {
+        try (var _ = updatedBaggage.makeCurrent()) {
             // 3. Optional: Alle Baggage-Felder (inkl. des neuen) als Span-Attribute
             // setzen
             // Damit sie in Elastic APM als Labels erscheinen

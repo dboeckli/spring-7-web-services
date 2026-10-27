@@ -30,8 +30,7 @@ public class CountryCamelRoute extends RouteBuilder {
             Span currentSpan = Span.current();
             if (currentSpan != null && currentSpan.isRecording()) {
                 String endpointUri = exchange.getFromEndpoint().getEndpointUri();
-                String endpointBaseUri = exchange.getFromEndpoint().getEndpointBaseUri();
-                String qname = endpointUri.replaceAll("spring-ws:rootqname:", "").split("\\?")[0];
+                String qname = endpointUri.replace("spring-ws:rootqname:", "").split("\\?")[0];
 
                 currentSpan.setAttribute("soap.endpoint", endpointUri);
                 currentSpan.setAttribute("soap.qname", qname);

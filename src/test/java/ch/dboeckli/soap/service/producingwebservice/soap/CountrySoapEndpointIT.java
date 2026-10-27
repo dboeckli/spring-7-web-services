@@ -30,7 +30,7 @@ class CountrySoapEndpointIT {
     private int port;
 
     @Test
-    public void testSendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
+    void testSendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
         WebServiceTemplate template = builder.build();
         GetCountryRequest request = new GetCountryRequest();
         request.setName("Spain");

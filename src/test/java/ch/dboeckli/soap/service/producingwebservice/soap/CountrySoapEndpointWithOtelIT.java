@@ -42,9 +42,6 @@ class CountrySoapEndpointWithOtelIT {
     @Autowired
     private InMemorySpanExporter spanExporter;
 
-    // @Autowired
-    // private InMemoryMetricExporter metricExporter;
-
     @BeforeEach
     void setUp() {
         spanExporter.reset();
