@@ -41,7 +41,7 @@ class CountrySoapEndpointIT {
     }
 
     @Test
-    public void testV2SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
+    void testV2SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
         WebServiceTemplate template = builder.build();
         GetCountryRequestV2 request = new GetCountryRequestV2();
         request.setName("Spain");
@@ -52,7 +52,7 @@ class CountrySoapEndpointIT {
     }
 
     @Test
-    public void testV3SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
+    void testV3SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
         WebServiceTemplate template = builder.build();
         GetCountryRequestV3 request = new GetCountryRequestV3();
         request.setName("Spain");

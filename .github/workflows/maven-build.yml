@@ -31,14 +31,14 @@ jobs:
       ORGANIZATION: ${{ steps.set_version.outputs.ORGANIZATION }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: mfinelli/setup-shfmt@v4
+      - uses: mfinelli/setup-shfmt@a25fda4c1fe115aec0f85e04126610841bc3141d # v4
         with:
           shfmt-version: 3.14.1
 
       - name: Set up java
-        uses: actions/setup-java@v6.1.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'liberica'
@@ -88,7 +88,6 @@ jobs:
         id: show_variables
         shell: bash
         env:
-          ALLMYSECRETS: ${{ toJSON(secrets) }}
           ALLMYVARS: ${{ toJSON(vars) }}
           ALLMYOUTPUT: ${{ toJSON(steps.set_version.outputs) }}
           BRANCH_MVN_VERSION: ${{ steps.set_version.outputs.BRANCH_MVN_VERSION }}
@@ -99,7 +98,6 @@ jobs:
           ORGANIZATION: ${{ steps.set_version.outputs.ORGANIZATION }}
 
         run: |
-          echo "### ALLMYSECRETS: $ALLMYSECRETS"
           echo "### ALLMYVARS: $ALLMYVARS"
           echo "### ALLMYOUTPUT: $ALLMYOUTPUT"
           
@@ -140,14 +138,14 @@ jobs:
       actions: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: mfinelli/setup-shfmt@v4
+      - uses: mfinelli/setup-shfmt@a25fda4c1fe115aec0f85e04126610841bc3141d # v4
         with:
           shfmt-version: 3.14.1
 
       - name: Set up java
-        uses: actions/setup-java@v6.1.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'liberica'
@@ -156,17 +154,15 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.15.1
+        uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
 
       - name: show variables
         id: show_build_variables
         shell: bash
         env:
-          ALLMYSECRETS: ${{ toJSON(secrets) }}
           ALLMYVARS: ${{ toJSON(vars) }}
           ALLMYOUTPUT: ${{ toJSON(needs.setup.outputs) }}
         run: |
-          echo "### ALLMYSECRETS: $ALLMYSECRETS"
           echo "### ALLMYVARS: $ALLMYVARS"
           echo "### ALLMYOUTPUT: $ALLMYOUTPUT"
 
@@ -201,7 +197,7 @@ jobs:
           mvn -B -e deploy -s $GITHUB_WORKSPACE/settings.xml
 
       - name: Upload Test Reports
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: failsafe-and-surefire-reports
@@ -252,16 +248,16 @@ jobs:
       actions: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
-      - uses: mfinelli/setup-shfmt@v4
+      - uses: mfinelli/setup-shfmt@a25fda4c1fe115aec0f85e04126610841bc3141d # v4
         with:
           shfmt-version: 3.14.1
 
       - name: Set up java
-        uses: actions/setup-java@v6.1.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'liberica'
@@ -270,7 +266,7 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.15.1
+        uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
 
       - name: Run Maven Build
         env:
@@ -303,7 +299,7 @@ jobs:
           mvn -B -e verify -Dskip.start.stop.springboot=true -Dskip.docker.build=true -Dskip.docker.publish=true -s $GITHUB_WORKSPACE/settings.xml	
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         if: always()
         with:
           files: |
