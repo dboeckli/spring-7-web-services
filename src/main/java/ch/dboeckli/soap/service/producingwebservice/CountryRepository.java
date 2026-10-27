@@ -2,13 +2,13 @@ package ch.dboeckli.soap.service.producingwebservice;
 
 import ch.dboeckli.soap.service.producingwebservice.schema.Country;
 import ch.dboeckli.soap.service.producingwebservice.schema.Currency;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Repository
 public class CountryRepository {
 
     private static final Map<String, Country> countries = new HashMap<>();

@@ -6,11 +6,12 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.boot.actuate.web.exchanges.HttpExchange;
 import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository;
 import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.util.List;
 
-@Component
+@Repository
 public class TracingHttpExchangeRepository implements HttpExchangeRepository {
 
     private final Tracer tracer;
@@ -32,13 +33,16 @@ public class TracingHttpExchangeRepository implements HttpExchangeRepository {
         delegate.add(exchange); // ← weiterhin im Memory speichern
 
         // ← zusätzlich als Span/Trace speichern
-        assert exchange.getTimeTaken() != null;
+        Duration timeTaken = exchange.getTimeTaken();
+        if (timeTaken == null) {
+            return;
+        }
         Span span = tracer.nextSpan()
             .name("http.exchange")
             .tag("http.method", exchange.getRequest().getMethod())
             .tag("http.uri", exchange.getRequest().getUri().toString())
             .tag("http.status", String.valueOf(exchange.getResponse().getStatus()))
-            .tag("time_taken", exchange.getTimeTaken().toString())
+            .tag("time_taken", timeTaken.toString())
             .start();
 
         // Headers als Tags
