@@ -7,7 +7,7 @@ This is a technical learning project for understanding web service patterns (SOA
 ## Project identity
 
 - **Artifact**: `ch.dboeckli.spring.soap.service:spring-7-web-services:0.0.1-SNAPSHOT`
-- **Java 25**, Spring Boot 4.1.0, Camel Spring Boot 4.21.0
+- **Java 25**, Spring Boot 4.1.2, Camel Spring Boot 4.23.0
 - **SCM**: `https://github.com/dboeckli/spring-7-web-services`
 
 ## Architecture
@@ -31,13 +31,14 @@ Key design decisions:
 
 | Package | Contents |
 |---|---|
-| `soap` | `CountrySoapEndpoint` (V1), `CountrySoapEndpointV2` (V2) |
-| `soap/config` | `WebServiceConfig` (WSDL bean), `CustomEndpointInterceptor` |
-| `camel` | `CountryCamelRoute` (V3 entry + `direct:get-country`), `SoapEndpointConfig` (beans for V3) |
-| `rest` | `CountryRestController` (`GET /api/countries/{name}`) |
-| `tracing` | 4 filter classes (`BaggageTagging`, `PayloadLogging`, `TraceDebug`, `TraceParent`) |
-| `log` | `RequestLoggingConfig`, `RequestLoggingFilter` (request logging) |
-| root | `CountryRepository`, `SpringSoapServiceApplication` |
+| `ch.dboeckli.soap.service` | `SpringSoapServiceApplication` |
+| `…producingwebservice` | `CountryRepository` |
+| `…producingwebservice.soap` | `CountrySoapEndpoint` (V1), `CountrySoapEndpointV2` (V2) |
+| `…producingwebservice.soap.config` | `WebServiceConfig` (WSDL bean), `CustomEndpointInterceptor` |
+| `…producingwebservice.camel` | `CountryCamelRoute` (V3 entry + `direct:get-country`), `SoapEndpointConfig` (beans for V3) |
+| `…producingwebservice.rest` | `CountryRestController` (`GET /api/countries/{name}`) |
+| `ch.dboeckli.soap.service.tracing` | `BaggageTaggingFilter`, `PayloadLoggingFilter`, `TraceDebugFilter`, `TraceParentFilter`, `TracingHttpExchangeRepository` |
+| `ch.dboeckli.soap.service.log` | `RequestLoggingConfig`, `RequestLoggingFilter` (request logging) |
 
 ## Build & test commands
 
@@ -53,7 +54,7 @@ docker compose -f compose.yaml up -d                       # start observability
 - **JaCoCo** for coverage (XML report to `target/site/jacoco/`).
 - **CycloneDX** for SBOM, **git-commit-id** for build metadata.
 - **Docker image** build at `install` phase via `spring-boot-maven-plugin:build-image-no-fork` (uses Buildpacks, `BP_JVM_VERSION=25`).
-- **Helm** processed in `install` phase: lint → template → dry-run → package.
+- **Helm** processed in `install` phase: dependencies → lint → template → dry-run → package.
 - **POM sort** enforced by Spotless — alphabetically ordered within sections.
 
 After changing code, always verify: run the relevant Maven goal above and report its output (evidence, not just "done").
@@ -105,11 +106,11 @@ Three workflows in `.github/workflows/`:
 
 | Workflow | Trigger | Key detail |
 |---|---|---|
-| `maven-build.yml` | push/PR/schedule | Three jobs: `setup` → `build` (`mvn deploy`), `analyze` (`mvn verify -Dskip.start.stop.springboot=true -Dskip.docker.build=true` + Sonar), `Trigger-Deploy` |
+| `maven-build.yml` | push/PR/schedule | Three jobs: `setup` → `build` (`mvn deploy`), `analyze` (`mvn verify -Dskip.start.stop.springboot=true -Dskip.docker.build=true -Dskip.docker.publish=true` + Sonar), `Trigger-Deploy` |
 | `deploy-and-test-cluster.yml` | `workflow_dispatch` | Deploys via Helm to Kind cluster, runs `helm test` |
 | `release.yml` | `workflow_dispatch` | `mvn release:prepare release:perform`, requires `main`/`master` + SNAPSHOT version |
 
-- `ci-cd` Maven profile activates via `env.GITHUB_ACTIONS=true`; `master-branch`/`main-branch` profiles set `docker.image.tag=latest`.
+- `ci-cd` Maven profile activates via `env.GITHUB_ACTIONS=true`; the `master-branch`/`main-branch` profiles set `docker.image.tag=snapshot`, the `release` profile (`performRelease`) sets `latest`.
 - Feature branches get a computed version via `set_maven_version.sh` script in `.github/workflows/scripts/`.
 
 ## Observability stack
@@ -123,11 +124,12 @@ Three workflows in `.github/workflows/`:
 
 ## External tools
 
-- **context7** — when you need to look up library/API docs, run `npx context7 <query>` or `npx context7 <package> <topic>`. Also available as an MCP server (`https://mcp.context7.com/mcp`, optional API key via `CONTEXT7_API_KEY` env var) — usable in IntelliJ and other MCP-compatible editors.
+- **context7** — when you need to look up library/API docs, run `npx ctx7 library "<name>" "<topic>"` to find the library ID, then `npx ctx7 docs <libraryId> <query>`. An MCP server (`https://mcp.context7.com/mcp`, optional API key via `CONTEXT7_API_KEY`) is also available for MCP-compatible editors.
 
 ## Non-obvious facts
 
 - HTTP test requests use `{{application-port}}` from `httpRequests/http-client.env.json`.
+- IntelliJ-HTTP-Flows: `httpRequests/restRequest/country-flow/` (REST) and `httpRequests/soapRequest/country-versions-flow/` (V1/V2/V3). Each flow ships a `.md` with a Mermaid diagram; steps build on each other via `client.global` (run in order). SOAP envelopes stay external XML files, referenced via `< ../getCountryRequest*.xml`.
 - `SoapEndpointConfig` registers `CamelEndpointMapping` and `MessageEndpointAdapter` beans — these are required for the V3 `spring-ws:` Camel entry point to work alongside Spring-WS.
 - The V3 route uses `interceptFrom("spring-ws:*")` to attach OTel span attributes for all Camel-managed SOAP endpoints.
 - The `local` Spring profile must be active for `spring.webservices.wsdl-locations` and OTel export to be configured; without it the WSDL won't be served.

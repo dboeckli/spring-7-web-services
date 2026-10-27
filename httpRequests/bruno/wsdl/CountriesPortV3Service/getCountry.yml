@@ -1,0 +1,31 @@
+info:
+  name: getCountry
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:{{application-port}}/services
+  headers:
+    - name: Content-Type
+      value: text/xml; charset=utf-8
+    - name: SOAPAction
+      value: ""
+  body:
+    type: xml
+    data: <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><getCountryRequestV3 xmlns="https://spring.io/guides/gs-producing-web-service"><name>string</name></getCountryRequestV3></soap:Body></soap:Envelope>
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("returns 200", function () {
+            expect(res.status === 200, "expected 200 but got " + res.status).to.be.true;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

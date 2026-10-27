@@ -47,10 +47,6 @@
     <skip.docker.publish>true</skip.docker.publish>
     <skip.start.stop.springboot>false</skip.start.stop.springboot>
 
-    <!-- TODO: remove this pin once https://github.com/paketo-buildpacks/builder-noble-java-tiny/issues/344 is fixed -->
-    <!-- :latest is arm64-only since 0.0.200; with Spring Boot 4.2.x switch to the new default paketobuildpacks/ubuntu-resolute-builder -->
-    <spring-boot.build-image.builder>paketobuildpacks/builder-noble-java-tiny:0.0.201</spring-boot.build-image.builder>
-
     <docker.image.tag>development</docker.image.tag>
     <!-- for feature branches -->
     <docker.repo>local</docker.repo>
@@ -62,6 +58,8 @@
 
     <logstash-logback.version>9.0</logstash-logback.version>
     <logback-ecs-encoder.version>1.8.0</logback-ecs-encoder.version>
+    <!-- 2.28.1-alpha depends on opentelemetry-api 1.62.0, matching Boot's managed ${opentelemetry.version} -->
+    <opentelemetry-logback-appender.version>2.28.1-alpha</opentelemetry-logback-appender.version>
 
     <!-- plugins -->
     <spring-javaformat-maven-plugin.version>0.0.48</spring-javaformat-maven-plugin.version>
@@ -179,6 +177,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-opentelemetry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+      <version>${opentelemetry-logback-appender.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -360,7 +363,6 @@
             <excludes>
               <exclude>.claude/**</exclude>
               <exclude>AGENTS.md</exclude>
-              <exclude>CLAUDE.md</exclude>
               <exclude>target/**</exclude>
               <exclude>**/node_modules/**</exclude>
             </excludes>

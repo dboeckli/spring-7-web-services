@@ -90,23 +90,30 @@ management:
     baggage:
       enabled: true
       # Specify which baggage fields should be propagated to downstream services
-      remote-fields:
-        - testBaggage,addedBaggage # Erlaubt das Empfangen des Headers "baggage: test1=..."
-      tag-fields:
-        - testBaggage,addedBaggage # KOPIERT den Wert aus dem Baggage in die Span-Labels (Attributes)
+      remote-fields: # Erlaubt das Empfangen des Headers "baggage: test1=..."
+        - testBaggage
+        - addedBaggage
+      tag-fields: # KOPIERT den Wert aus dem Baggage in die Span-Labels (Attributes)
+        - testBaggage
+        - addedBaggage
       correlation:
-        fields:
-          - testBaggage,addedBaggage # Also make baggage available in MDC for logging
+        fields: # Also make baggage available in MDC for logging
+          - testBaggage
+          - addedBaggage
         enabled: true
   logging:
     export:
-      enabled: false
+      enabled: true
       otlp:
-        enabled: false
+        enabled: true
   opentelemetry:
     resource-attributes:
       service.namespace: "spring-7-web-services"
       deployment.environment: "local"
+    logging:
+      export:
+        otlp:
+          endpoint: "http://localhost:4318/v1/logs"
     tracing:
       export:
         otlp:

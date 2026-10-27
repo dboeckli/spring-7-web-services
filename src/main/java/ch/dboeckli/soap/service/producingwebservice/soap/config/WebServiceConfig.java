@@ -14,11 +14,28 @@ public class WebServiceConfig implements WsConfigurer {
 
     @Bean
     public DefaultWsdl11Definition countries(SimpleXsdSchema countriesWs) {
+        return wsdlDefinition(countriesWs, "CountriesPort", "Request", "Response");
+    }
+
+    @Bean
+    public DefaultWsdl11Definition countriesV2(SimpleXsdSchema countriesWs) {
+        return wsdlDefinition(countriesWs, "CountriesPortV2", "RequestV2", "ResponseV2");
+    }
+
+    @Bean
+    public DefaultWsdl11Definition countriesV3(SimpleXsdSchema countriesWs) {
+        return wsdlDefinition(countriesWs, "CountriesPortV3", "RequestV3", "ResponseV3");
+    }
+
+    private DefaultWsdl11Definition wsdlDefinition(SimpleXsdSchema countriesWs, String portTypeName,
+            String requestSuffix, String responseSuffix) {
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
-        wsdl11Definition.setPortTypeName("CountriesPort");
+        wsdl11Definition.setPortTypeName(portTypeName);
         wsdl11Definition.setLocationUri("/services");
         wsdl11Definition.setTargetNamespace("https://spring.io/guides/gs-producing-web-service");
         wsdl11Definition.setSchema(countriesWs);
+        wsdl11Definition.setRequestSuffix(requestSuffix);
+        wsdl11Definition.setResponseSuffix(responseSuffix);
         return wsdl11Definition;
     }
 

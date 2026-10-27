@@ -36,6 +36,11 @@ jobs:
   deploy-app-with-helm:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     steps:
       - name: Show Version
         run: |
@@ -122,6 +127,91 @@ jobs:
             echo "All Helm tests passed successfully."
           fi                 
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Install Bruno CLI
+        run: |
+          # The npm registry occasionally serves package metadata before the
+          # tarball is available. npm does not retry 404s, so retry the
+          # whole install here.
+          for attempt in 1 2 3; do
+            if npm install -g --ignore-scripts @usebruno/cli@4.3.0; then
+              echo "Bruno CLI installed (attempt $attempt)"
+              exit 0
+            fi
+            echo "::warning::npm install failed (attempt $attempt), retrying..."
+            npm cache clean --force || true
+            sleep 15
+          done
+          echo "::error::Could not install @usebruno/cli after 3 attempts"
+          exit 1
+
+      - name: Run Bruno smoke tests
+        env:
+          NAMESPACE: ${{ inputs.namespace }}
+          APPLICATION_NAME: ${{ inputs.application-name }}
+        working-directory: httpRequests/bruno
+        run: |
+          set -o pipefail
+          set -o nounset
+          set -o errexit
+
+          kubectl port-forward svc/"$APPLICATION_NAME" 8080:8080 -n "$NAMESPACE" > /tmp/port-forward.log 2>&1 &
+          PORT_FORWARD_PID=$!
+          trap 'kill $PORT_FORWARD_PID 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/actuator/health/readiness > /dev/null; then
+              echo "Application reachable via port-forward (attempt $attempt)"
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "::error::Application not reachable via port-forward"
+              cat /tmp/port-forward.log
+              exit 1
+            fi
+            sleep 2
+          done
+
+          mkdir -p "$GITHUB_WORKSPACE/bru-reports"
+          for flow in restRequest/country-flow soapRequest/country-versions-flow; do
+            name="${flow//\//-}"
+            echo "::group::Bruno smoke tests: $flow"
+            bru run "$flow" --env local \
+              --reporter-skip-all-headers \
+              --reporter-junit "$GITHUB_WORKSPACE/bru-reports/TEST-bruno-$name.xml" \
+              --reporter-html "$GITHUB_WORKSPACE/bru-reports/bru-report-$name.html"
+            echo "::endgroup::"
+          done
+
+          echo "::group::Bruno WSDL contract imports"
+          bru run wsdl -r --env local \
+            --reporter-skip-all-headers \
+            --reporter-junit "$GITHUB_WORKSPACE/bru-reports/TEST-bruno-wsdl.xml" \
+            --reporter-html "$GITHUB_WORKSPACE/bru-reports/bru-report-wsdl.html"
+          echo "::endgroup::"
+
+      - name: Upload Bruno reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: bruno-reports
+          path: bru-reports/
+          if-no-files-found: warn
+
+      - name: Publish Bruno test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: bru-reports/TEST-bruno-*.xml
+          check_name: Bruno API smoke tests
+          comment_mode: "off"
+          fail_on: test failures
+          action_fail: true
+
       - name: Display Deployment Information
         env:
           NAMESPACE: ${{ inputs.namespace }}
@@ -154,3 +244,83 @@ jobs:
             kubectl get pods -n $NAMESPACE
           fi          
 
+  publish-bruno-report:
+    needs: deploy-app-with-helm
+    if: always()
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    steps:
+      - name: Download Bruno reports
+        uses: actions/download-artifact@v8.0.2
+        continue-on-error: true
+        with:
+          name: bruno-reports
+          path: bru-reports
+
+      - name: Build Pages site
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -o nounset
+          set -o errexit
+
+          mkdir -p _site
+          shopt -s nullglob
+          reports=(bru-reports/*.html)
+
+          if [ "${#reports[@]}" -eq 0 ]; then
+            printf '%s\n' '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Bruno reports</title></head><body><h1>Bruno smoke test reports</h1><p>No report available for this run.</p></body></html>' > _site/index.html
+            exit 0
+          fi
+
+          cp "${reports[@]}" _site/
+          {
+            printf '%s\n' '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Bruno reports</title></head><body>'
+            printf '<h1>Bruno smoke test reports</h1>\n'
+            printf '<p>Workflow run: <a href="%s">%s</a></p>\n' "$RUN_URL" "$RUN_URL"
+            printf '<ul>\n'
+            for report in "${reports[@]}"; do
+              name=$(basename "$report")
+              printf '  <li><a href="%s">%s</a></li>\n' "$name" "$name"
+            done
+            printf '</ul>\n</body></html>\n'
+          } > _site/index.html
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6.0.0
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: _site
+          # Unique per attempt: re-runs would otherwise leave a second "github-pages" artifact.
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5.0.1
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Add report link to summary
+        if: always()
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          if [ -n "${PAGE_URL:-}" ]; then
+            echo "### Bruno reports" >> "$GITHUB_STEP_SUMMARY"
+            echo "$PAGE_URL" >> "$GITHUB_STEP_SUMMARY"
+          fi

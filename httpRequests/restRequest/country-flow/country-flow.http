@@ -1,0 +1,131 @@
+# Flow: REST country lookup (Spring MVC) — see restRequest/country-flow/country-flow.md
+# Run in order: step 5 depends on the traceId set by step 2.
+
+### 1) actuator health (precondition)
+GET http://localhost:{{application-port}}/actuator/health
+Accept: application/json
+
+> {%
+    client.test("health returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("health status is UP", function () {
+        client.assert(response.body.status === "UP", "status=" + response.body.status);
+    });
+%}
+
+### 2) get country with an explicit traceparent (continues the incoming trace)
+< {%
+    function randomHex(length) {
+        let result = "";
+        const chars = "0123456789abcdef";
+        for (let i = 0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+
+    client.global.set("traceId", randomHex(32));
+    client.global.set("spanId", randomHex(16));
+    client.log("continuing trace " + client.global.get("traceId"));
+%}
+GET http://localhost:{{application-port}}/api/countries/Spain
+Accept: application/json
+traceparent: 00-{{traceId}}-{{spanId}}-01
+baggage: testBaggage=hallo
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns Spain", function () {
+        client.assert(response.body.name === "Spain", "name=" + response.body.name);
+        client.assert(response.body.capital === "Madrid", "capital=" + response.body.capital);
+        client.assert(response.body.currency === "EUR", "currency=" + response.body.currency);
+        client.assert(response.body.population === 46704314, "population=" + response.body.population);
+    });
+    client.test("does not overwrite the incoming traceparent", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!traceparent, "unexpected response traceparent: " + traceparent);
+    });
+%}
+
+### 3) get country without traceparent (server creates a new trace)
+GET http://localhost:{{application-port}}/api/countries/Spain
+Accept: application/json
+baggage: testBaggage=hallo
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns Spain", function () {
+        client.assert(response.body.name === "Spain", "name=" + response.body.name);
+        client.assert(response.body.currency === "EUR", "currency=" + response.body.currency);
+    });
+    client.test("server generates a traceparent response header", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!!traceparent, "traceparent response header missing");
+        client.assert(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/.test(traceparent),
+            "unexpected traceparent: " + traceparent);
+        client.global.set("generatedTraceparent", traceparent);
+    });
+%}
+
+### 4) unknown country returns 404
+GET http://localhost:{{application-port}}/api/countries/Atlantis
+Accept: application/json
+
+> {%
+    client.test("returns 404", function () {
+        client.assert(response.status === 404, "expected 404 but got " + response.status);
+    });
+%}
+
+### 5) verify the recorded exchange (actuator/httpexchanges) — requires step 2
+< {%
+    const traceId = client.global.get("traceId");
+    client.log("verify exchange -> traceId: " + traceId);
+    if (!traceId) {
+        throw new Error("traceId is not set - run step 2 first");
+    }
+%}
+GET http://localhost:{{application-port}}/actuator/httpexchanges
+Accept: application/json
+
+> {%
+    const traceId = client.global.get("traceId");
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("records the Spain request with the propagated traceparent", function () {
+        const exchanges = response.body.exchanges || [];
+        const match = exchanges.find(function (exchange) {
+            const uri = exchange.request && exchange.request.uri ? exchange.request.uri : "";
+            return uri.includes("/api/countries/Spain")
+                && JSON.stringify(exchange.request.headers || {}).includes(traceId);
+        });
+        client.assert(!!match, "no recorded exchange for /api/countries/Spain with traceId " + traceId);
+        client.assert(String(match.response.status) === "200", "status=" + match.response.status);
+    });
+%}
+
+### 6) prometheus counter for the REST endpoint (optional sanity check)
+GET http://localhost:{{application-port}}/actuator/metrics/http.server.requests
+Accept: application/json
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("exposes measured http.server.requests", function () {
+        const availableTags = response.body.availableTags || [];
+        const uriTag = availableTags.find(function (tag) {
+            return tag.tag === "uri";
+        });
+        client.assert(!!uriTag, "uri tag missing");
+        client.assert(uriTag.values.some(function (value) {
+            return value.includes("/api/countries");
+        }), "no /api/countries uri tag: " + JSON.stringify(uriTag.values));
+    });
+%}
