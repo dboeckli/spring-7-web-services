@@ -55,7 +55,7 @@ jobs:
           echo "Deployment triggered by workflow $DEPLOYED_BY_WORKFLOW. Run number: $DEPLOYED_BY_BUILD"
 
       - name: Check out the repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.15.1
