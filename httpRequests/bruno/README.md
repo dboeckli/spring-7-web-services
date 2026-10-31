@@ -5,7 +5,7 @@ Bruno-Collection wird daraus als **OpenCollection YAML** generiert und dient als
 IntelliJ HTTP Client sowie zur Automatisierung per CLI.
 
 Aktueller Stand: REST-Flow (`restRequest/country-flow`) und SOAP-Flow
-(`soapRequest/country-versions-flow`). SOAP-Bodies werden beim Generieren aus den externen
+(`soapRequest/country-versions-flow`, V1–V4). SOAP-Bodies werden beim Generieren aus den externen
 XML-Dateien (`< ../getCountryRequest*.xml`) **inline** in die Bruno-Requests übernommen, weil
 Bruno keine Datei-Referenzen im Body kennt.
 
@@ -20,8 +20,8 @@ httpRequests/bruno/
 ├── restRequest/
 │   └── country-flow/           # 6 Schritte aus country-flow.http
 ├── soapRequest/
-│   └── country-versions-flow/  # 8 Schritte aus country-versions-flow.http
-├── wsdl/                       # Contract-Snapshots V1/V2/V3 + generierte Requests
+│   └── country-versions-flow/  # 10 Schritte aus country-versions-flow.http
+├── wsdl/                       # Contract-Snapshots V1–V4 + generierte Requests
 └── tools/
     ├── http-to-bru.mjs         # Generator .http -> .yml
     ├── import-wsdl.mjs         # bru import wsdl + URL/xmlns-Fix
@@ -51,6 +51,9 @@ entfernt veraltete generierte Dateien im Zielbereich. Die `.http`-Dateien werden
 ```bash
 cd httpRequests/bruno
 
+# gesamter SOAP-Flow (V1–V4)
+bru run soapRequest/country-versions-flow --env local
+
 # gesamter REST-Flow
 bru run restRequest/country-flow --env local
 
@@ -58,8 +61,9 @@ bru run restRequest/country-flow --env local
 bru run restRequest/country-flow --env k8s
 ```
 
-Runtime-Variablen (`bru.setVar`) überleben nur einen CLI-Lauf: Schritt 5 (`httpexchanges`) kann
-nicht allein gestartet werden, sondern nur im Flow-Verbund.
+Runtime-Variablen (`bru.setVar`) überleben nur einen CLI-Lauf: der `httpexchanges`-Verify-Schritt
+(SOAP: Schritt 10, REST: Schritt 5) kann nicht allein gestartet werden, sondern nur im
+Flow-Verbund.
 
 ## Script-Übersetzung
 
@@ -80,7 +84,7 @@ Verschachtelte Objekte wie `exchange.response.status` werden bewusst **nicht** e
 
 ## WSDL-Contract
 
-Die generierten WSDLs (V1/V2/V3) und die daraus per `bru import wsdl` erzeugten Requests liegen
+Die generierten WSDLs (V1–V4) und die daraus per `bru import wsdl` erzeugten Requests liegen
 unter `wsdl/` (Wrapper: `tools/import-wsdl.mjs`, korrigiert URL und Target-Namespace). Diese
 Requests sind nur ein Gerüst (Beispiel-Body, keine Trace-Header, nur 200-Check); der Master
 für Flows bleibt die `.http`-Ableitung. Details: `wsdl/README.md`.

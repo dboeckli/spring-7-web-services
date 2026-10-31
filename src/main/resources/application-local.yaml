@@ -13,6 +13,9 @@ spring:
         in-tests: true
   webservices:
     wsdl-locations: "classpath:META-INF/schemas/"
+cxf:
+  # CXFServlet path for the V4 Camel-CXF endpoint (Spring-WS keeps /services)
+  path: "/cxf"
 camel:
   opentelemetry2:
     enabled: true

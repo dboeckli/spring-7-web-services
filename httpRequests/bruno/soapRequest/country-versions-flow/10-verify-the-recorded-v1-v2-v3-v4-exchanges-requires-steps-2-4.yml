@@ -1,7 +1,7 @@
 info:
-  name: 8) verify the recorded V1/V2/V3 exchanges (actuator/httpexchanges) — requires steps 2, 4 and 6
+  name: 10) verify the recorded V1/V2/V3/V4 exchanges (actuator/httpexchanges) — requires steps 2, 4, 6 and 8
   type: http
-  seq: 8
+  seq: 10
 
 http:
   method: GET
@@ -24,12 +24,13 @@ runtime:
         test("returns 200", function () {
             expect(res.status === 200, "expected 200 but got " + res.status).to.be.true;
         });
-        test("records one /services exchange per variant for the shared traceId", function () {
+        test("records one exchange per variant for the shared traceId", function () {
             const matches = (res.body.exchanges || []).filter(function (exchange) {
                 const uri = exchange.request && exchange.request.uri ? exchange.request.uri : "";
-                return uri.includes("/services") && JSON.stringify(exchange.request.headers || {}).includes(traceId);
+                const isTracked = uri.includes("/services") || uri.includes("/cxf/countriesV4");
+                return isTracked && JSON.stringify(exchange.request.headers || {}).includes(traceId);
             });
-            expect(matches.length === 3, "expected 3 exchanges for the traceId but got " + matches.length).to.be.true;
+            expect(matches.length === 4, "expected 4 exchanges for the traceId but got " + matches.length).to.be.true;
             matches.forEach(function (exchange) {
                 expect(String(exchange.response.status) === "200", "unexpected status " + exchange.response.status).to.be.true;
             });

@@ -12,20 +12,22 @@ This is a technical learning project for understanding web service patterns (SOA
 
 ## Architecture
 
-The project exposes three SOAP interface versions and one REST interface:
+The project exposes four SOAP interface versions and one REST interface:
 
 | Version    | Entry Point                                            | Flow                                                                                         |
 | ---------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
 | V1 (SOAP)  | Spring-WS `@Endpoint` (`CountrySoapEndpoint`)          | SOAP Client → Spring-WS Endpoint → `CountryRepository`                                       |
 | V2 (SOAP)  | Spring-WS `@Endpoint` (`CountrySoapEndpointV2`)        | SOAP Client → Spring-WS Endpoint → Camel `direct:get-country` → `CountryRepository`          |
 | V3 (SOAP)  | Apache Camel `spring-ws:` component                    | SOAP Client → Camel `spring-ws:rootqname` → Camel `direct:get-country` → `CountryRepository` |
+| V4 (SOAP)  | Apache Camel `cxf:` component (`CountryServiceV4` SEI) | SOAP Client → `POST /cxf/countriesV4` → Camel `direct:get-country` → `CountryRepository`    |
 | REST       | Spring MVC `@RestController` (`CountryRestController`) | HTTP Client → `GET /api/countries/{name}` → `CountryRepository`                              |
 
 Key design decisions:
 
-- V2 and V3 share `direct:get-country` to avoid duplicating business logic. V1 and REST access `CountryRepository` directly.
+- V2, V3 and V4 share `direct:get-country` to avoid duplicating business logic. V1 and REST access `CountryRepository` directly.
 - V2 uses Spring-WS as the HTTP entry point and delegates to Camel via `ProducerTemplate`; V3 lets Camel own the HTTP entry point via the `spring-ws:` component.
-- `direct:get-country` handles JAXB marshalling/unmarshalling and OpenTelemetry baggage propagation for both V2 and V3.
+- V4 uses Camel's `cxf:` component (POJO mode with the `CountryServiceV4` JAX-WS SEI): Camel stays the endpoint owner, CXF provides transport, WSDL (`/cxf/countriesV4?wsdl`) and the `/cxf/` overview page.
+- `direct:get-country` handles JAXB marshalling/unmarshalling and OpenTelemetry baggage propagation for V2, V3 and V4.
 
 ## Package layout (main)
 
@@ -35,7 +37,7 @@ Key design decisions:
 | `…producingwebservice` | `CountryRepository` |
 | `…producingwebservice.soap` | `CountrySoapEndpoint` (V1), `CountrySoapEndpointV2` (V2) |
 | `…producingwebservice.soap.config` | `WebServiceConfig` (WSDL bean), `CustomEndpointInterceptor` |
-| `…producingwebservice.camel` | `CountryCamelRoute` (V3 entry + `direct:get-country`), `SoapEndpointConfig` (beans for V3) |
+| `…producingwebservice.camel` | `CountryCamelRoute` (V3/V4 entries + `direct:get-country`), `CountryServiceV4` (JAX-WS SEI), `SoapEndpointConfig` (V3 beans + sync CXFServlet) |
 | `…producingwebservice.rest` | `CountryRestController` (`GET /api/countries/{name}`) |
 | `ch.dboeckli.soap.service.tracing` | `BaggageTaggingFilter`, `PayloadLoggingFilter`, `TraceDebugFilter`, `TraceParentFilter`, `TracingHttpExchangeRepository` |
 | `ch.dboeckli.soap.service.log` | `RequestLoggingConfig`, `RequestLoggingFilter` (request logging) |
@@ -129,8 +131,9 @@ Three workflows in `.github/workflows/`:
 ## Non-obvious facts
 
 - HTTP test requests use `{{application-port}}` from `httpRequests/http-client.env.json`.
-- IntelliJ-HTTP-Flows: `httpRequests/restRequest/country-flow/` (REST) and `httpRequests/soapRequest/country-versions-flow/` (V1/V2/V3). Each flow ships a `.md` with a Mermaid diagram; steps build on each other via `client.global` (run in order). SOAP envelopes stay external XML files, referenced via `< ../getCountryRequest*.xml`.
-- `SoapEndpointConfig` registers `CamelEndpointMapping` and `MessageEndpointAdapter` beans — these are required for the V3 `spring-ws:` Camel entry point to work alongside Spring-WS.
-- The V3 route uses `interceptFrom("spring-ws:*")` to attach OTel span attributes for all Camel-managed SOAP endpoints.
+- IntelliJ-HTTP-Flows: `httpRequests/restRequest/country-flow/` (REST) and `httpRequests/soapRequest/country-versions-flow/` (V1–V4). Each flow ships a `.md` with a Mermaid diagram; steps build on each other via `client.global` (run in order). SOAP envelopes stay external XML files, referenced via `< ../getCountryRequest*.xml`.
+- `SoapEndpointConfig` registers `CamelEndpointMapping` and `MessageEndpointAdapter` beans — these are required for the V3 `spring-ws:` Camel entry point to work alongside Spring-WS. It also registers the `CXFServlet` synchronously (`setAsyncSupported(false)`) so the caching `PayloadLoggingFilter` does not lose CXF async responses.
+- V4 uses `cxf.path=/cxf` (Spring-WS keeps `/services`) and the WSDL at `src/main/resources/wsdl/countriesV4.wsdl`; CXF adds Woodstox, so the V3 route calls `convertBodyTo(String.class)` before `.unmarshal().jaxb(...)` because Woodstox's DOM wrapping reader does not intern QName parts.
+- The route uses `interceptFrom("spring-ws:*,cxf:*")` to attach OTel span attributes for all Camel-managed SOAP endpoints.
 - The `local` Spring profile must be active for `spring.webservices.wsdl-locations` and OTel export to be configured; without it the WSDL won't be served.
 - Integration tests start/stop the Spring Boot app via the Failsafe/spring-boot-maven-plugin lifecycle on a dynamically reserved port (`tomcat.http.port`).

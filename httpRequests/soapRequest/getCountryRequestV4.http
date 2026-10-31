@@ -1,0 +1,33 @@
+### SOAP V4 - Apache Camel CXF consumer, routes directly into Camel route (direct:get-country) — CXF owns transport and WSDL
+< {%
+    function randomHex(length) {
+        let result = '';
+        const chars = '0123456789abcdef';
+        for (let i = 0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+
+    const traceId = randomHex(32);
+    const spanId  = randomHex(16);
+
+    request.variables.set("traceId", traceId);
+    request.variables.set("spanId", spanId);
+%}
+POST http://localhost:{{application-port}}/cxf/countriesV4
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+traceparent: 00-{{traceId}}-{{spanId}}-03
+baggage: testBaggage=hallo
+
+< ./getCountryRequestV4.xml
+
+
+### SOAP V4 - without traceparent
+POST http://localhost:{{application-port}}/cxf/countriesV4
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+baggage: testBaggage=hallo
+
+< ./getCountryRequestV4.xml
