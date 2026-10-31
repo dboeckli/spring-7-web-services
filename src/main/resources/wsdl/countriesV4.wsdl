@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:sch="https://spring.io/guides/gs-producing-web-service"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:tns="https://spring.io/guides/gs-producing-web-service"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  targetNamespace="https://spring.io/guides/gs-producing-web-service">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+               elementFormDefault="qualified"
+               targetNamespace="https://spring.io/guides/gs-producing-web-service">
+
+      <xs:element name="getCountryRequestV4">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="getCountryResponseV4">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="country" type="tns:country"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:complexType name="country">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="population" type="xs:int"/>
+          <xs:element name="capital" type="xs:string"/>
+          <xs:element name="currency" type="tns:currency"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:simpleType name="currency">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="GBP"/>
+          <xs:enumeration value="EUR"/>
+          <xs:enumeration value="PLN"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="getCountryResponseV4">
+    <wsdl:part element="tns:getCountryResponseV4" name="getCountryResponseV4">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCountryRequestV4">
+    <wsdl:part element="tns:getCountryRequestV4" name="getCountryRequestV4">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="CountriesPortV4">
+    <wsdl:operation name="getCountry">
+      <wsdl:input message="tns:getCountryRequestV4" name="getCountryRequestV4">
+      </wsdl:input>
+      <wsdl:output message="tns:getCountryResponseV4" name="getCountryResponseV4">
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CountriesPortV4Soap11" type="tns:CountriesPortV4">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getCountry">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="getCountryRequestV4">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCountryResponseV4">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="CountriesPortV4Service">
+    <wsdl:port binding="tns:CountriesPortV4Soap11" name="CountriesPortV4Soap11">
+      <soap:address location="http://localhost:8080/cxf/countriesV4"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

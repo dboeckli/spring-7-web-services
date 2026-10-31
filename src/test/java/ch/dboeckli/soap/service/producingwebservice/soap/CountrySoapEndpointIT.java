@@ -62,4 +62,15 @@ class CountrySoapEndpointIT {
         assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
     }
 
+    @Test
+    void testV4SendAndReceive(@Autowired WebServiceTemplateBuilder builder) {
+        WebServiceTemplate template = builder.build();
+        GetCountryRequestV4 request = new GetCountryRequestV4();
+        request.setName("Spain");
+
+        GetCountryResponseV4 response = (GetCountryResponseV4) template
+            .marshalSendAndReceive("http://localhost:%d/cxf/countriesV4".formatted(port), request);
+        assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
+    }
+
 }

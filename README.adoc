@@ -21,7 +21,7 @@ NOTE: To simplify the example, you will use hardcoded data for the United Kingdo
 
 == Architecture Overview
 
-The project exposes three SOAP interface versions and one REST interface, each with a different integration approach:
+The project exposes four SOAP interface versions and one REST interface, each with a different integration approach:
 
 [cols="1,2,3", options="header"]
 |===
@@ -39,6 +39,10 @@ The project exposes three SOAP interface versions and one REST interface, each w
 | Apache Camel `spring-ws:` component
 | SOAP Client → Camel Route (`spring-ws:rootqname:getCountryRequestV3`) → Apache Camel (`direct:get-country`) → `CountryRepository` (Business Logic)
 
+| *V4* (SOAP)
+| Apache Camel `cxf:` component (Camel-CXF)
+| SOAP Client → Camel Route (`cxf:/countriesV4`) → Apache Camel (`direct:get-country`) → `CountryRepository` (Business Logic)
+
 | *REST*
 | Spring MVC `@RestController` (`CountryRestController`)
 | HTTP Client → `GET /api/countries/{name}` → `CountryRepository` (Business Logic)
@@ -49,29 +53,49 @@ Key observations:
 * *V1* uses Spring-WS directly and accesses the repository without any middleware.
 * *V2* uses Spring-WS as the entry point but delegates processing to a shared Apache Camel route (`direct:get-country`) via a `ProducerTemplate`. This allows reuse of the Camel-based processing pipeline.
 * *V3* uses Apache Camel's `spring-ws` component as the entry point, so the entire request handling — including SOAP message reception — is managed by Camel. It routes into the same shared `direct:get-country` route as V2.
-* The shared Camel route (`direct:get-country`) handles JAXB marshalling/unmarshalling and OpenTelemetry baggage propagation for both V2 and V3.
+* *V4* uses Apache Camel's `cxf` component (Camel-CXF) as the entry point: Camel remains the endpoint owner, while CXF provides the transport, the WSDL and the `/cxf/` service overview page. It routes into the same shared `direct:get-country` route as V2/V3.
+* The shared Camel route (`direct:get-country`) handles JAXB marshalling/unmarshalling and OpenTelemetry baggage propagation for V2, V3 and V4.
 * The *REST* interface bypasses both Spring-WS and Camel entirely, accessing the repository directly like V1.
 
 .Interface Architecture
 [mermaid]
 ....
 flowchart TB
-    SOAP["SOAP Clients<br/>POST /services"]
-    HTTP["HTTP Client<br/>GET /api/countries/{name}"]
+    subgraph CLIENTS[" "]
+        direction LR
+        SOAP["SOAP Clients<br/>POST /services"]
+        SOAPC["SOAP Clients<br/>POST /cxf/countriesV4"]
+        HTTP["HTTP Client<br/>GET /api/countries/{name}"]
+    end
+    style CLIENTS fill:none,stroke:none
 
-    V1["V1 - Spring-WS @Endpoint<br/>CountrySoapEndpoint"]
-    V2["V2 - Spring-WS @Endpoint<br/>CountrySoapEndpointV2"]
-    V3["V3 - Apache Camel spring-ws:<br/>rootqname getCountryRequestV3"]
+    subgraph VERSIONS[" "]
+        direction LR
+        V1["V1 - Spring-WS @Endpoint<br/>CountrySoapEndpoint"]
+        V2["V2 - Spring-WS @Endpoint<br/>CountrySoapEndpointV2"]
+        V3["V3 - Apache Camel spring-ws:<br/>rootqname getCountryRequestV3"]
+        V4["V4 - Apache Camel cxf:<br/>countriesV4"]
+    end
+    style VERSIONS fill:none,stroke:none
     REST["REST - Spring MVC @RestController<br/>CountryRestController"]
 
     CAMEL["Apache Camel Route<br/>direct:get-country<br/>JAXB marshal + OTel"]
     REPO["CountryRepository<br/>(Business Logic)"]
 
+    classDef rest fill:#dafbe1,stroke:#1a7f37,stroke-width:2px,color:#000
+    class HTTP,REST rest
+    classDef soap fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#000
+    class SOAP,V1,V2,V3 soap
+    classDef cxf fill:#ffedd5,stroke:#ea580c,stroke-width:2px,color:#000
+    class SOAPC,V4 cxf
+
     SOAP --> V1 & V2 & V3
+    SOAPC --> V4
     HTTP --> REST
     V1 -->|direct| REPO
     V2 -->|ProducerTemplate| CAMEL
     V3 --> CAMEL
+    V4 --> CAMEL
     CAMEL --> REPO
     REST -->|direct| REPO
 ....
@@ -217,12 +241,18 @@ with the `spring.webservices.path` property.
 | V3
 | http://localhost:8080/services/countriesV3.wsdl[countriesV3.wsdl]
 | `CountriesPortV3`
+
+| V4
+| http://localhost:8080/cxf/countriesV4?wsdl[countriesV4?wsdl]
+| `CountriesPortV4`
 |===
 
-All three WSDLs point to the same SOAP endpoint `POST http://localhost:8080/services`; the version
-is selected by the request element in the SOAP body. SOAP has no OpenAPI/Swagger-style overview page
-— the WSDL is the contract. Import it into SoapUI, Postman, the IntelliJ HTTP Client or Bruno
-(`bru import wsdl`).
+The V1–V3 WSDLs point to the same SOAP endpoint `POST http://localhost:8080/services`; the version
+is selected by the request element in the SOAP body. V4 is served by the CXFServlet under `/cxf`
+(`cxf.path=/cxf`), so its endpoint is `POST http://localhost:8080/cxf/countriesV4`. The CXF
+service overview page is available at http://localhost:8080/cxf/[/cxf/] and links the V4 WSDL.
+SOAP has no OpenAPI/Swagger-style overview page — the WSDL is the contract. Import it into SoapUI,
+Postman, the IntelliJ HTTP Client or Bruno (`bru import wsdl`).
 
 === Actuator endpoints
 
@@ -237,8 +267,9 @@ is selected by the request element in the SOAP body. SOAP has no OpenAPI/Swagger
 | http://localhost:8080/actuator/camelroutes[/actuator/camelroutes]
 |===
 
-`/actuator/mappings` lists the handler/servlet mappings (incl. the `/services` Spring-WS servlet),
-`/actuator/camelroutes` the Camel routes (incl. the `spring-ws` V3 entry and `direct:get-country`).
+`/actuator/mappings` lists the handler/servlet mappings (incl. the `/services` Spring-WS servlet and
+the `/cxf` CXFServlet), `/actuator/camelroutes` the Camel routes (incl. the `spring-ws` V3 entry, the
+`cxf` V4 entry and `direct:get-country`).
 Both require the `local` profile (or any profile that exposes the actuator endpoints).
 
 === POM sources
@@ -323,6 +354,15 @@ include::httpRequests/soapRequest/getCountryRequestV2.http[]
 [source,httprequest]
 ----
 include::httpRequests/soapRequest/getCountryRequestV3.http[]
+----
+
+=== SOAP V4 — Camel cxf: entry point, via Camel route
+
+`httpRequests/soapRequest/getCountryRequestV4.http`
+
+[source,httprequest]
+----
+include::httpRequests/soapRequest/getCountryRequestV4.http[]
 ----
 
 === REST — Spring MVC @RestController, direct to repository

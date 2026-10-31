@@ -1,9 +1,12 @@
 package ch.dboeckli.soap.service.producingwebservice.camel;
 
+import ch.dboeckli.soap.service.producingwebservice.schema.Currency;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequest;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV2;
+import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryRequestV4;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponse;
 import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV2;
+import ch.dboeckli.soap.service.producingwebservice.schema.GetCountryResponseV4;
 import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,18 @@ class CountryCamelRouteTest {
                 GetCountryResponseV2.class);
 
         assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
+    }
+
+    @Test
+    void shouldReturnCountryForV4Request() {
+        GetCountryRequestV4 request = new GetCountryRequestV4();
+        request.setName("Spain");
+
+        GetCountryResponseV4 response = producerTemplate.requestBody(CountryCamelRoute.DIRECT_GET_COUNTRY, request,
+                GetCountryResponseV4.class);
+
+        assertThat(response.getCountry().getCapital()).isEqualTo("Madrid");
+        assertThat(response.getCountry().getCurrency()).isEqualTo(Currency.EUR);
     }
 
 }
