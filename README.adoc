@@ -249,10 +249,28 @@ with the `spring.webservices.path` property.
 
 The V1–V3 WSDLs point to the same SOAP endpoint `POST http://localhost:8080/services`; the version
 is selected by the request element in the SOAP body. V4 is served by the CXFServlet under `/cxf`
-(`cxf.path=/cxf`), so its endpoint is `POST http://localhost:8080/cxf/countriesV4`. The CXF
-service overview page is available at http://localhost:8080/cxf/[/cxf/] and links the V4 WSDL.
-SOAP has no OpenAPI/Swagger-style overview page — the WSDL is the contract. Import it into SoapUI,
-Postman, the IntelliJ HTTP Client or Bruno (`bru import wsdl`).
+(`cxf.path=/cxf`), so its endpoint is `POST http://localhost:8080/cxf/countriesV4`. SOAP has no
+OpenAPI/Swagger-style overview page — the WSDL is the contract. Import it into SoapUI, Postman, the
+IntelliJ HTTP Client or Bruno (`bru import wsdl`).
+
+=== CXF web GUI
+
+The CXF servlet provides an HTML overview of the published CXF endpoints (the closest thing to a
+"Swagger UI for SOAP"). It links the V4 WSDL.
+
+[cols="1,3", options="header"]
+|===
+| Environment | CXF services overview
+
+| Local (`local` profile)
+| http://localhost:8080/cxf/[/cxf/]
+
+| Kubernetes (NodePort)
+| http://localhost:30080/cxf/[/cxf/]
+|===
+
+The overview also lists the endpoint address and the WSDL link
+(`http://localhost:8080/cxf/countriesV4?wsdl`).
 
 === Actuator endpoints
 
