@@ -45,6 +45,11 @@ services:
   kibana:
     image: "docker.elastic.co/kibana/kibana:9.5.5"
     container_name: "kibana"
+    environment:
+    - "I18N_LOCALES=[\"en\"]"
+    - "I18N_DEFAULTLOCALE=en"
+    - "I18N_DETECTBROWSERLOCALE=false"
+    - "telemetry.optIn=false"
     ports:
     - "5601:5601"
     networks:

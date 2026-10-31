@@ -59,8 +59,9 @@ public class PayloadLoggingFilter extends OncePerRequestFilter {
     }
 
     private String truncate(String body, int maxLength) {
-        if (body == null || body.isEmpty())
+        if (body == null || body.isEmpty()) {
             return "<empty>";
+        }
         return body.length() > maxLength ? body.substring(0, maxLength) + "..." : body;
     }
 

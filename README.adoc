@@ -198,6 +198,49 @@ which the generated WSDL file is available. In this case, the WSDL will be avail
 By default, they will be exposed on the `"/services"` HTTP endpoint, but this can be customized
 with the `spring.webservices.path` property.
 
+== Service URLs
+
+=== SOAP WSDL definitions
+
+[cols="1,3,2", options="header"]
+|===
+| Version | WSDL URL | Port type
+
+| V1
+| http://localhost:8080/services/countries.wsdl[countries.wsdl]
+| `CountriesPort`
+
+| V2
+| http://localhost:8080/services/countriesV2.wsdl[countriesV2.wsdl]
+| `CountriesPortV2`
+
+| V3
+| http://localhost:8080/services/countriesV3.wsdl[countriesV3.wsdl]
+| `CountriesPortV3`
+|===
+
+All three WSDLs point to the same SOAP endpoint `POST http://localhost:8080/services`; the version
+is selected by the request element in the SOAP body. SOAP has no OpenAPI/Swagger-style overview page
+— the WSDL is the contract. Import it into SoapUI, Postman, the IntelliJ HTTP Client or Bruno
+(`bru import wsdl`).
+
+=== Actuator endpoints
+
+[cols="1,3", options="header"]
+|===
+| Endpoint | URL
+
+| Mappings
+| http://localhost:8080/actuator/mappings[/actuator/mappings]
+
+| Camel routes
+| http://localhost:8080/actuator/camelroutes[/actuator/camelroutes]
+|===
+
+`/actuator/mappings` lists the handler/servlet mappings (incl. the `/services` Spring-WS servlet),
+`/actuator/camelroutes` the Camel routes (incl. the `spring-ws` V3 entry and `direct:get-country`).
+Both require the `local` profile (or any profile that exposes the actuator endpoints).
+
 === POM sources
 
 * Versions *< 4.15.0*: Spring Boot version from `camel-spring-boot` BOM; CXF version fetched additionally from `camel-parent`.
