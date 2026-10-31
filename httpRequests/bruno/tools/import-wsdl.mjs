@@ -4,8 +4,8 @@
  *
  * Wraps `bru import wsdl` and fixes the two things the importer gets wrong for
  * this service:
- *   1. the URL is only the path from soap:address (/services) - make it absolute
- *      via {{application-port}}
+ *   1. the URL is only the path from soap:address (/services, /cxf/countriesV4) -
+ *      make it absolute via {{application-port}}
  *   2. the generated body is missing the targetNamespace on the request element
  *      - without it the service answers 404
  *
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const COLLECTION_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WSDL_DIR = path.join(COLLECTION_ROOT, 'wsdl');
-const BASE_URL = 'http://localhost:{{application-port}}/services';
+const BASE_ORIGIN = 'http://localhost:{{application-port}}';
 
 async function collectYmlFiles(directory) {
   const result = [];
@@ -49,12 +49,13 @@ const STATUS_TEST = `runtime:
 
 `;
 
-function rewriteRequest(content, targetNamespace) {
+function rewriteRequest(content, targetNamespace, addressPath) {
+  const baseUrl = `${BASE_ORIGIN}${addressPath}`;
   const rewritten = content
     .split('\n')
     .map((line) => {
-      if (/^\s+url: \/services\s*$/.test(line)) {
-        return line.replace('/services', BASE_URL);
+      if (/^\s+url: /.test(line)) {
+        return line.replace(/url: .*$/, `url: ${baseUrl}`);
       }
       if (line.trimStart().startsWith('data: ')) {
         return line.replace(/(<soap:Body>\s*<)([A-Za-z0-9_.:-]+)(\s*>)/,
@@ -77,9 +78,11 @@ async function main() {
     const wsdl = await readFile(wsdlPath, 'utf8');
     const targetNamespace = wsdl.match(/targetNamespace="([^"]+)"/)?.[1];
     const serviceName = wsdl.match(/<wsdl:service name="([^"]+)"/)?.[1];
+    const address = wsdl.match(/<soap:address location="([^"]+)"/)?.[1] ?? '/services';
     if (!targetNamespace || !serviceName) {
       throw new Error(`Cannot read targetNamespace/service name from ${wsdlFile}`);
     }
+    const addressPath = new URL(address, 'http://localhost').pathname;
 
     const tempDir = await mkdtemp(path.join(os.tmpdir(), 'bruno-wsdl-'));
     try {
@@ -90,7 +93,7 @@ async function main() {
       const targetDir = path.join(WSDL_DIR, serviceName);
       await mkdir(targetDir, { recursive: true });
       for (const file of imported) {
-        const content = rewriteRequest(await readFile(file, 'utf8'), targetNamespace);
+        const content = rewriteRequest(await readFile(file, 'utf8'), targetNamespace, addressPath);
         await writeFile(path.join(targetDir, path.basename(file)), content);
         console.log(`generated wsdl/${serviceName}/${path.basename(file)}`);
       }

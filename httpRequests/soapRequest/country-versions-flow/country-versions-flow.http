@@ -1,5 +1,5 @@
-# Flow: SOAP country lookup across V1 / V2 / V3 — see soapRequest/country-versions-flow/country-versions-flow.md
-# Run in order: steps 4 and 6 reuse the traceId from step 2, step 8 verifies all three variants.
+# Flow: SOAP country lookup across V1 / V2 / V3 / V4 — see soapRequest/country-versions-flow/country-versions-flow.md
+# Run in order: steps 4, 6 and 8 reuse the traceId from step 2, step 10 verifies all four variants.
 # Bodies are kept as external XML files (../getCountryRequest*.xml) - one source of truth per version.
 
 ### 1) actuator health (precondition)
@@ -186,7 +186,66 @@ baggage: testBaggage=hallo
     });
 %}
 
-### 8) verify the recorded V1/V2/V3 exchanges (actuator/httpexchanges) — requires steps 2, 4 and 6
+### 8) SOAP V4 with traceparent (Camel-CXF: /cxf/countriesV4 into direct:get-country)
+< {%
+    if (!client.global.get("traceId")) {
+        throw new Error("traceId is not set - run step 2 first");
+    }
+    const hex = (length) => Array.from({ length: length },
+        () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
+    client.global.set("spanId", hex(16));
+%}
+POST http://localhost:{{application-port}}/cxf/countriesV4
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+traceparent: 00-{{traceId}}-{{spanId}}-01
+baggage: testBaggage=hallo
+
+< ../getCountryRequestV4.xml
+
+> {%
+    const body = String(response.body);
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V4 response", function () {
+        client.assert(/<([\w-]+:)?getCountryResponseV4[\s>]/.test(body), "getCountryResponseV4 missing");
+        client.assert(/<([\w-]+:)?name>Spain</.test(body), "name=Spain missing");
+        client.assert(/<([\w-]+:)?capital>Madrid</.test(body), "capital=Madrid missing");
+        client.assert(/<([\w-]+:)?currency>EUR</.test(body), "currency=EUR missing");
+    });
+    client.test("preserves the incoming traceId in the response traceparent", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!!traceparent, "traceparent response header missing");
+        client.assert(traceparent.startsWith("00-" + client.global.get("traceId") + "-"),
+            "response traceparent does not carry the incoming traceId: " + traceparent);
+    });
+%}
+
+### 9) SOAP V4 without traceparent (server creates a new trace)
+POST http://localhost:{{application-port}}/cxf/countriesV4
+Content-Type: text/xml; charset=utf-8
+SOAPAction: ""
+baggage: testBaggage=hallo
+
+< ../getCountryRequestV4.xml
+
+> {%
+    client.test("returns 200", function () {
+        client.assert(response.status === 200, "expected 200 but got " + response.status);
+    });
+    client.test("returns the V4 response", function () {
+        client.assert(/<([\w-]+:)?name>Spain</.test(String(response.body)), "name=Spain missing");
+    });
+    client.test("server generates a traceparent response header", function () {
+        const traceparent = response.headers.valueOf("traceparent");
+        client.assert(!!traceparent, "traceparent response header missing");
+        client.assert(/^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$/.test(traceparent),
+            "unexpected traceparent: " + traceparent);
+    });
+%}
+
+### 10) verify the recorded V1/V2/V3/V4 exchanges (actuator/httpexchanges) — requires steps 2, 4, 6 and 8
 < {%
     if (!client.global.get("traceId")) {
         throw new Error("traceId is not set - run step 2 first");
@@ -200,12 +259,13 @@ Accept: application/json
     client.test("returns 200", function () {
         client.assert(response.status === 200, "expected 200 but got " + response.status);
     });
-    client.test("records one /services exchange per variant for the shared traceId", function () {
+    client.test("records one exchange per variant for the shared traceId", function () {
         const matches = (response.body.exchanges || []).filter(function (exchange) {
             const uri = exchange.request && exchange.request.uri ? exchange.request.uri : "";
-            return uri.includes("/services") && JSON.stringify(exchange.request.headers || {}).includes(traceId);
+            const isTracked = uri.includes("/services") || uri.includes("/cxf/countriesV4");
+            return isTracked && JSON.stringify(exchange.request.headers || {}).includes(traceId);
         });
-        client.assert(matches.length === 3, "expected 3 exchanges for the traceId but got " + matches.length);
+        client.assert(matches.length === 4, "expected 4 exchanges for the traceId but got " + matches.length);
         matches.forEach(function (exchange) {
             client.assert(String(exchange.response.status) === "200",
                 "unexpected status " + exchange.response.status);

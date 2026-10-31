@@ -131,7 +131,7 @@ Three workflows in `.github/workflows/`:
 ## Non-obvious facts
 
 - HTTP test requests use `{{application-port}}` from `httpRequests/http-client.env.json`.
-- IntelliJ-HTTP-Flows: `httpRequests/restRequest/country-flow/` (REST) and `httpRequests/soapRequest/country-versions-flow/` (V1/V2/V3). Each flow ships a `.md` with a Mermaid diagram; steps build on each other via `client.global` (run in order). SOAP envelopes stay external XML files, referenced via `< ../getCountryRequest*.xml`.
+- IntelliJ-HTTP-Flows: `httpRequests/restRequest/country-flow/` (REST) and `httpRequests/soapRequest/country-versions-flow/` (V1–V4). Each flow ships a `.md` with a Mermaid diagram; steps build on each other via `client.global` (run in order). SOAP envelopes stay external XML files, referenced via `< ../getCountryRequest*.xml`.
 - `SoapEndpointConfig` registers `CamelEndpointMapping` and `MessageEndpointAdapter` beans — these are required for the V3 `spring-ws:` Camel entry point to work alongside Spring-WS. It also registers the `CXFServlet` synchronously (`setAsyncSupported(false)`) so the caching `PayloadLoggingFilter` does not lose CXF async responses.
 - V4 uses `cxf.path=/cxf` (Spring-WS keeps `/services`) and the WSDL at `src/main/resources/wsdl/countriesV4.wsdl`; CXF adds Woodstox, so the V3 route calls `convertBodyTo(String.class)` before `.unmarshal().jaxb(...)` because Woodstox's DOM wrapping reader does not intern QName parts.
 - The route uses `interceptFrom("spring-ws:*,cxf:*")` to attach OTel span attributes for all Camel-managed SOAP endpoints.
