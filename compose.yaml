@@ -43,7 +43,7 @@ services:
     - "monitoring"
     restart: "unless-stopped"
   kibana:
-    image: "docker.elastic.co/kibana/kibana:9.5.5"
+    image: "docker.elastic.co/kibana/kibana:9.5.6"
     container_name: "kibana"
     environment:
     - "I18N_LOCALES=[\"en\"]"
