@@ -154,7 +154,7 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.15.1
+        uses: helm/kind-action@v1.15.2
 
       - name: show variables
         id: show_build_variables
@@ -266,7 +266,7 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.15.1
+        uses: helm/kind-action@v1.15.2
 
       - name: Run Maven Build
         env:
