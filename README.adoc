@@ -430,18 +430,11 @@ Start a new sandbox:
 
 [source,powershell]
 ----
-sbx run opencode `
-    --kit "git+https://codeberg.org/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
-    --template docker.io/domboeckli/sbx-opencode-tooling:latest `
+sbx run docker.io/domboeckli/sbx-opencode:latest `
     --skills=off `
     --static-mcp idea,k8s,docker `
     . `
     "C:\development\maven-repo:ro"
 ----
-
-The trailing arguments mount the current directory (`.`) and the local Maven repository read-only.
-`--static-mcp idea,k8s,docker` exposes the host-side IntelliJ, Kubernetes and Docker MCP servers;
-skill sharing is disabled with `--skills=off`.
-
 
 
